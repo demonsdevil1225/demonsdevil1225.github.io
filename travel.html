@@ -81,6 +81,50 @@
             100% { opacity:.12; transform:scaleX(3) rotate(var(--a)) }
         }
 
+        /* ── MUSIC BUTTON ── */
+        #musicBtn {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 99990;
+            width: 56px; height: 56px; border-radius: 50%;
+            border: 1.5px solid rgba(100,180,255,0.35);
+            background: rgba(0,20,60,0.65); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 24px rgba(50,150,255,0.25), 0 4px 20px rgba(0,0,0,0.4);
+            transition: transform .25s, box-shadow .25s;
+            animation: musicBtnPulse 3s ease-in-out infinite;
+        }
+        #musicBtn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 0 40px rgba(50,150,255,0.5), 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #musicBtn.muted {
+            animation: none;
+            border-color: rgba(244,160,176,0.35);
+            box-shadow: 0 0 16px rgba(244,160,176,0.15), 0 4px 20px rgba(0,0,0,0.4);
+        }
+        @keyframes musicBtnPulse {
+            0%,100% { box-shadow: 0 0 18px rgba(50,150,255,0.3), 0 4px 20px rgba(0,0,0,0.4); }
+            50% { box-shadow: 0 0 40px rgba(100,180,255,0.65), 0 0 70px rgba(50,150,255,0.2), 0 4px 20px rgba(0,0,0,0.4); }
+        }
+        #musicBtn::before {
+            content: '';
+            position: absolute; inset: -6px; border-radius: 50%;
+            border: 1px solid rgba(100,180,255,0.18);
+            animation: vinylSpin 4s linear infinite;
+        }
+        #musicBtn.muted::before { opacity: 0; }
+        @keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .music-note {
+            position: fixed; pointer-events: none; z-index: 99989;
+            font-size: 1rem; animation: noteFloat 3s ease-out forwards;
+        }
+        @keyframes noteFloat {
+            0% { opacity: 1; transform: translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--nx), var(--ny)) scale(0.4); }
+        }
+
         /* BACK BUTTON */
         .back-btn {
             position: fixed; top:1.5rem; left:1.5rem; z-index:9999;
@@ -468,6 +512,12 @@
 <div class="moonray" style="--a:18deg;left:75%;"></div>
 <canvas id="starCanvas"></canvas>
 
+<!-- MUSIC PLAYER -->
+<audio id="bgMusic" loop>
+    <source src="tra.mp3" type="audio/mpeg">
+</audio>
+<button id="musicBtn" title="Toggle music" onclick="toggleMusic()">🎵</button>
+
 <!-- BACK BUTTON -->
 <a href="index.html" class="back-btn">← Home</a>
 
@@ -630,10 +680,8 @@
                         </marker>
                     </defs>
 
-                    <!-- MAP BACKGROUND -->
                     <rect width="900" height="420" fill="url(#bgGrad)"/>
 
-                    <!-- SUBTLE GRID LINES -->
                     <g stroke="rgba(100,180,255,0.06)" stroke-width="0.5">
                         <line x1="0" y1="60" x2="900" y2="60"/>
                         <line x1="0" y1="120" x2="900" y2="120"/>
@@ -648,50 +696,40 @@
                         <line x1="750" y1="0" x2="750" y2="420"/>
                     </g>
 
-                    <!-- TERRAIN PATCHES (decorative hills/regions) -->
                     <ellipse cx="680" cy="130" rx="70" ry="40" fill="rgba(0,80,40,0.12)" stroke="rgba(50,200,100,0.06)" stroke-width="1"/>
                     <ellipse cx="320" cy="340" rx="50" ry="30" fill="rgba(0,50,80,0.15)" stroke="rgba(50,150,200,0.07)" stroke-width="1"/>
-                    <!-- Mountain symbols near Vaalparai -->
                     <g fill="rgba(100,200,255,0.07)" stroke="rgba(100,200,255,0.08)" stroke-width="1">
                         <polygon points="660,80 680,48 700,80"/>
                         <polygon points="690,85 712,52 734,85"/>
                         <polygon points="720,88 740,58 760,88"/>
                     </g>
-                    <!-- Water near Kava Island -->
                     <ellipse cx="320" cy="345" rx="45" ry="22" fill="rgba(0,100,200,0.15)" stroke="rgba(50,150,255,0.12)" stroke-width="1"/>
                     <text x="320" y="349" text-anchor="middle" font-size="8" fill="rgba(100,180,255,0.4)" font-family="serif" font-style="italic">river</text>
 
-                    <!-- ROUTES -->
-                    <!-- Route 1: Ukkadam → Erode (east) -->
                     <path d="M 410,220 C 500,210 580,185 700,175"
                           stroke="rgba(255,217,125,0.7)" stroke-width="2.5" fill="none" stroke-dasharray="8,4"
                           marker-end="url(#arrowGold)" filter="url(#glowSoft)"/>
-                    <!-- Route glow -->
                     <path d="M 410,220 C 500,210 580,185 700,175"
                           stroke="rgba(255,217,125,0.15)" stroke-width="10" fill="none" stroke-linecap="round"/>
 
-                    <!-- Route 2: Ukkadam → Kava Island (southwest) -->
                     <path d="M 400,225 C 370,260 340,300 320,340"
                           stroke="rgba(255,217,125,0.55)" stroke-width="2.5" fill="none" stroke-dasharray="6,5"
                           marker-end="url(#arrowGold)" filter="url(#glowSoft)"/>
                     <path d="M 400,225 C 370,260 340,300 320,340"
                           stroke="rgba(255,217,125,0.12)" stroke-width="10" fill="none" stroke-linecap="round"/>
 
-                    <!-- Route 3: Ukkadam → Nelambathi (north) -->
                     <path d="M 405,215 C 410,165 420,130 440,95"
                           stroke="rgba(255,180,80,0.6)" stroke-width="2.5" fill="none" stroke-dasharray="5,6"
                           marker-end="url(#arrowGold)" filter="url(#glowSoft)"/>
                     <path d="M 405,215 C 410,165 420,130 440,95"
                           stroke="rgba(255,180,80,0.12)" stroke-width="10" fill="none" stroke-linecap="round"/>
 
-                    <!-- Route 4: Eachanari → Vaalparai (up into hills) -->
                     <path d="M 430,255 C 500,240 570,200 670,140"
                           stroke="rgba(255,160,60,0.6)" stroke-width="2.5" fill="none" stroke-dasharray="4,7"
                           marker-end="url(#arrowGold)" filter="url(#glowSoft)"/>
                     <path d="M 430,255 C 500,240 570,200 670,140"
                           stroke="rgba(255,160,60,0.12)" stroke-width="10" fill="none" stroke-linecap="round"/>
 
-                    <!-- NODE: Ukkadam (hub) -->
                     <circle cx="407" cy="222" r="14" fill="rgba(255,217,125,0.18)" stroke="rgba(255,217,125,0.8)" stroke-width="2" filter="url(#glow)"/>
                     <circle cx="407" cy="222" r="7" fill="rgba(255,217,125,0.9)"/>
                     <circle cx="407" cy="222" r="22" fill="none" stroke="rgba(255,217,125,0.2)" stroke-width="1.5">
@@ -701,42 +739,35 @@
                     <text x="407" y="245" text-anchor="middle" font-size="11" fill="rgba(255,217,125,0.95)" font-family="Dancing Script, cursive" font-weight="bold">Ukkadam</text>
                     <text x="407" y="257" text-anchor="middle" font-size="9" fill="rgba(255,200,80,0.55)" font-family="Cormorant Garamond, serif" font-style="italic">our home base</text>
 
-                    <!-- NODE: Eachanari -->
                     <circle cx="430" cy="255" r="10" fill="rgba(255,180,80,0.18)" stroke="rgba(255,180,80,0.7)" stroke-width="1.5"/>
                     <circle cx="430" cy="255" r="5" fill="rgba(255,180,80,0.85)"/>
                     <text x="430" y="272" text-anchor="middle" font-size="10" fill="rgba(255,190,90,0.85)" font-family="Dancing Script, cursive">Eachanari</text>
 
-                    <!-- NODE: Erode -->
                     <circle cx="705" cy="174" r="11" fill="rgba(255,217,125,0.18)" stroke="rgba(255,217,125,0.7)" stroke-width="1.5"/>
                     <circle cx="705" cy="174" r="5.5" fill="rgba(255,217,125,0.85)"/>
                     <text x="705" y="162" text-anchor="middle" font-size="11" fill="rgba(255,217,125,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Erode</text>
                     <text x="705" y="152" text-anchor="middle" font-size="8.5" fill="rgba(255,200,80,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">Honda City type 1 🌹</text>
 
-                    <!-- NODE: Kava Island -->
                     <circle cx="320" cy="342" r="11" fill="rgba(50,150,255,0.2)" stroke="rgba(100,180,255,0.7)" stroke-width="1.5"/>
                     <circle cx="320" cy="342" r="5.5" fill="rgba(100,200,255,0.85)"/>
                     <text x="320" y="363" text-anchor="middle" font-size="11" fill="rgba(130,210,255,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Kava Island</text>
                     <text x="320" y="373" text-anchor="middle" font-size="8.5" fill="rgba(100,180,255,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">🏝️ river escape</text>
 
-                    <!-- NODE: Nelambathi -->
                     <circle cx="440" cy="93" r="11" fill="rgba(200,150,255,0.2)" stroke="rgba(180,130,255,0.7)" stroke-width="1.5"/>
                     <circle cx="440" cy="93" r="5.5" fill="rgba(190,150,255,0.85)"/>
                     <text x="440" y="81" text-anchor="middle" font-size="11" fill="rgba(200,170,255,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Nelambathi</text>
                     <text x="440" y="70" text-anchor="middle" font-size="8.5" fill="rgba(180,140,255,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">🌿 forest roads</text>
 
-                    <!-- NODE: Vaalparai -->
                     <circle cx="672" cy="138" r="11" fill="rgba(50,200,120,0.2)" stroke="rgba(80,220,150,0.7)" stroke-width="1.5"/>
                     <circle cx="672" cy="138" r="5.5" fill="rgba(80,220,150,0.85)"/>
                     <text x="700" y="128" text-anchor="middle" font-size="11" fill="rgba(100,230,170,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Vaalparai</text>
                     <text x="700" y="118" text-anchor="middle" font-size="8.5" fill="rgba(80,200,140,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">⛰️ misty hills</text>
 
-                    <!-- ROUTE LABELS -->
                     <text x="560" y="192" text-anchor="middle" font-size="9" fill="rgba(255,217,125,0.5)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-4,560,192)">~200 km</text>
                     <text x="348" y="295" text-anchor="start" font-size="9" fill="rgba(100,180,255,0.5)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-70,348,295)">~25 km</text>
                     <text x="418" y="145" text-anchor="start" font-size="9" fill="rgba(190,150,255,0.5)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-80,418,145)">~40 km</text>
                     <text x="555" y="207" text-anchor="middle" font-size="9" fill="rgba(255,160,60,0.5)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-18,555,207)">~80 km</text>
 
-                    <!-- COMPASS -->
                     <g transform="translate(50,50)">
                         <circle r="22" fill="rgba(0,20,60,0.6)" stroke="rgba(100,180,255,0.25)" stroke-width="1"/>
                         <text y="-10" text-anchor="middle" font-size="9" fill="rgba(150,200,255,0.7)" font-family="sans-serif" font-weight="bold">N</text>
@@ -748,7 +779,6 @@
                         <polygon points="0,-16 3,0 0,3 -3,0" fill="rgba(150,200,255,0.8)"/>
                     </g>
 
-                    <!-- SCALE -->
                     <g transform="translate(800,390)">
                         <line x1="-60" y1="0" x2="0" y2="0" stroke="rgba(150,200,255,0.4)" stroke-width="1.5"/>
                         <line x1="-60" y1="-4" x2="-60" y2="4" stroke="rgba(150,200,255,0.4)" stroke-width="1.5"/>
@@ -756,12 +786,10 @@
                         <text x="-30" y="-6" text-anchor="middle" font-size="8" fill="rgba(150,200,255,0.5)" font-family="sans-serif">~50 km</text>
                     </g>
 
-                    <!-- Title watermark -->
                     <text x="450" y="410" text-anchor="middle" font-size="9" fill="rgba(100,180,255,0.15)" font-family="Dancing Script, cursive">Our car adventures through Tamil Nadu 🚗</text>
                 </svg>
             </div>
 
-            <!-- LEGEND -->
             <div class="map-legend">
                 <div class="map-legend-title car-lt">Routes</div>
                 <div class="legend-row"><span class="legend-dot" style="background:rgba(255,217,125,0.9);"></span>Ukkadam → Erode</div>
@@ -776,7 +804,6 @@
     </div>
 </section>
 
-<!-- SECTION SEPARATOR -->
 <div class="section-sep" style="margin:4rem auto;z-index:10;position:relative;"></div>
 
 <!-- ══════════════════════════════════════════ BUS SECTION ══════════════════════════════════════════ -->
@@ -787,7 +814,6 @@
         <h2 class="sec-title bus-title">Bus Journeys 🚌</h2>
         <div class="sec-divider bus-div"></div>
 
-        <!-- HERO CARD -->
         <div class="hero-card-wrap bus-hero">
             <img src="bus.png" alt="Our bus journeys" class="hero-card-img"
                  onerror="this.style.display='none';this.parentNode.querySelector('.hero-card-overlay').style.background='linear-gradient(135deg,rgba(0,25,50,0.95),rgba(0,15,35,0.95))'">
@@ -797,7 +823,6 @@
             </div>
         </div>
 
-        <!-- DESTINATIONS -->
         <p class="sec-eyebrow" style="margin-bottom:1.2rem;">destinations</p>
         <div class="dest-list">
             <div class="dest-item bus-dest">
@@ -826,7 +851,6 @@
             </div>
         </div>
 
-        <!-- MOMENTS -->
         <p class="sec-eyebrow" style="margin-bottom:1.2rem;">moments</p>
         <div class="moments-grid">
             <div class="moment-card bus-moment">
@@ -884,7 +908,6 @@
 
                     <rect width="900" height="420" fill="url(#bgGradBus)"/>
 
-                    <!-- GRID -->
                     <g stroke="rgba(93,202,165,0.05)" stroke-width="0.5">
                         <line x1="0" y1="60" x2="900" y2="60"/>
                         <line x1="0" y1="120" x2="900" y2="120"/>
@@ -899,50 +922,42 @@
                         <line x1="750" y1="0" x2="750" y2="420"/>
                     </g>
 
-                    <!-- STATE BORDER (rough TN-Kerala) -->
                     <path d="M 250,0 C 260,60 240,120 220,180 C 200,240 180,300 200,420"
                           stroke="rgba(100,180,255,0.08)" stroke-width="2" fill="none" stroke-dasharray="10,6"/>
                     <text x="185" y="30" font-size="8" fill="rgba(100,180,255,0.15)" font-family="serif" font-style="italic" transform="rotate(-85,185,30)">TN / Kerala border</text>
 
-                    <!-- HIGHWAY HINTS -->
                     <line x1="0" y1="215" x2="900" y2="215" stroke="rgba(255,200,50,0.05)" stroke-width="3"/>
                     <text x="820" y="210" font-size="8" fill="rgba(255,200,50,0.12)" font-family="sans-serif">NH 544</text>
 
-                    <!-- ROUTE 1: Ukkadam → Pollachi (southwest) -->
                     <path d="M 430,215 C 380,230 330,255 255,285"
                           stroke="rgba(93,202,165,0.75)" stroke-width="2.5" fill="none" stroke-dasharray="7,4"
                           marker-end="url(#arrowTeal)" filter="url(#glowSoftBus)"/>
                     <path d="M 430,215 C 380,230 330,255 255,285"
                           stroke="rgba(93,202,165,0.12)" stroke-width="10" fill="none" stroke-linecap="round"/>
 
-                    <!-- ROUTE 2: Ukkadam → Palakkad (west across border) -->
                     <path d="M 425,212 C 370,195 310,185 235,178"
                           stroke="rgba(60,200,200,0.75)" stroke-width="2.5" fill="none" stroke-dasharray="6,5"
                           marker-end="url(#arrowTeal)" filter="url(#glowSoftBus)"/>
                     <path d="M 425,212 C 370,195 310,185 235,178"
                           stroke="rgba(60,200,200,0.12)" stroke-width="10" fill="none" stroke-linecap="round"/>
 
-                    <!-- ROUTE 3: Ukkadam → Prozone (local, short) -->
                     <path d="M 436,208 C 460,195 490,185 525,178"
                           stroke="rgba(150,220,180,0.65)" stroke-width="2" fill="none" stroke-dasharray="5,6"
                           marker-end="url(#arrowTeal)" filter="url(#glowSoftBus)"/>
                     <path d="M 436,208 C 460,195 490,185 525,178"
                           stroke="rgba(150,220,180,0.1)" stroke-width="8" fill="none" stroke-linecap="round"/>
 
-                    <!-- ROUTE 4: Ukkadam → Chennai (far east, long) -->
                     <path d="M 440,210 C 520,190 630,160 740,120 C 790,102 820,88 845,70"
                           stroke="rgba(93,202,165,0.6)" stroke-width="2.5" fill="none" stroke-dasharray="4,7"
                           marker-end="url(#arrowTeal)" filter="url(#glowSoftBus)"/>
                     <path d="M 440,210 C 520,190 630,160 740,120 C 790,102 820,88 845,70"
                           stroke="rgba(93,202,165,0.1)" stroke-width="12" fill="none" stroke-linecap="round"/>
 
-                    <!-- BUS ICON ON CHENNAI ROUTE -->
                     <g transform="translate(650,148)" opacity="0.5">
                         <rect x="-12" y="-7" width="24" height="14" rx="3" fill="rgba(93,202,165,0.3)" stroke="rgba(93,202,165,0.5)" stroke-width="1"/>
                         <text x="0" y="4" text-anchor="middle" font-size="9" fill="rgba(93,202,165,0.9)">🚌</text>
                     </g>
 
-                    <!-- NODE: Ukkadam (hub) -->
                     <circle cx="433" cy="213" r="15" fill="rgba(93,202,165,0.18)" stroke="rgba(93,202,165,0.85)" stroke-width="2" filter="url(#glowBus)"/>
                     <circle cx="433" cy="213" r="7" fill="rgba(93,202,165,0.9)"/>
                     <circle cx="433" cy="213" r="25" fill="none" stroke="rgba(93,202,165,0.2)" stroke-width="1.5">
@@ -952,37 +967,31 @@
                     <text x="433" y="236" text-anchor="middle" font-size="11" fill="rgba(93,202,165,0.95)" font-family="Dancing Script, cursive" font-weight="bold">Ukkadam</text>
                     <text x="433" y="247" text-anchor="middle" font-size="9" fill="rgba(70,180,140,0.55)" font-family="Cormorant Garamond, serif" font-style="italic">KSRTC / TN bus stand</text>
 
-                    <!-- NODE: Pollachi -->
                     <circle cx="253" cy="286" r="11" fill="rgba(93,202,165,0.18)" stroke="rgba(93,202,165,0.7)" stroke-width="1.5"/>
                     <circle cx="253" cy="286" r="5.5" fill="rgba(93,202,165,0.85)"/>
                     <text x="240" y="302" text-anchor="middle" font-size="10.5" fill="rgba(93,202,165,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Pollachi</text>
                     <text x="240" y="313" text-anchor="middle" font-size="8" fill="rgba(70,180,140,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">~45 km</text>
 
-                    <!-- NODE: Palakkad (Kerala) -->
                     <circle cx="233" cy="177" r="11" fill="rgba(60,200,200,0.18)" stroke="rgba(60,200,200,0.7)" stroke-width="1.5"/>
                     <circle cx="233" cy="177" r="5.5" fill="rgba(60,200,200,0.85)"/>
                     <text x="233" y="163" text-anchor="middle" font-size="10.5" fill="rgba(80,220,220,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Palakkad</text>
                     <text x="233" y="153" text-anchor="middle" font-size="8" fill="rgba(60,200,200,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">Kerala 🌴</text>
 
-                    <!-- NODE: Prozone -->
                     <circle cx="527" cy="177" r="10" fill="rgba(150,220,180,0.18)" stroke="rgba(150,220,180,0.65)" stroke-width="1.5"/>
                     <circle cx="527" cy="177" r="5" fill="rgba(150,220,180,0.85)"/>
                     <text x="527" y="166" text-anchor="middle" font-size="10.5" fill="rgba(160,230,190,0.9)" font-family="Dancing Script, cursive" font-weight="bold">Prozone</text>
                     <text x="527" y="155" text-anchor="middle" font-size="8" fill="rgba(130,200,160,0.5)" font-family="Cormorant Garamond, serif" font-style="italic">🛍️ mall day</text>
 
-                    <!-- NODE: Chennai -->
                     <circle cx="847" cy="68" r="12" fill="rgba(93,202,165,0.18)" stroke="rgba(93,202,165,0.75)" stroke-width="2" filter="url(#glowBus)"/>
                     <circle cx="847" cy="68" r="6" fill="rgba(93,202,165,0.9)"/>
                     <text x="847" y="57" text-anchor="middle" font-size="11" fill="rgba(93,202,165,0.95)" font-family="Dancing Script, cursive" font-weight="bold">Chennai</text>
                     <text x="847" y="46" text-anchor="middle" font-size="8.5" fill="rgba(70,180,140,0.55)" font-family="Cormorant Garamond, serif" font-style="italic">~490 km overnight</text>
 
-                    <!-- ROUTE LABELS -->
                     <text x="355" y="253" text-anchor="middle" font-size="9" fill="rgba(93,202,165,0.45)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-20,355,253)">~45 km</text>
                     <text x="330" y="182" text-anchor="middle" font-size="9" fill="rgba(60,200,200,0.45)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-6,330,182)">~105 km</text>
                     <text x="484" y="185" text-anchor="middle" font-size="9" fill="rgba(150,220,180,0.45)" font-family="Cormorant Garamond, serif" font-style="italic">~5 km</text>
                     <text x="650" y="158" text-anchor="middle" font-size="9" fill="rgba(93,202,165,0.4)" font-family="Cormorant Garamond, serif" font-style="italic" transform="rotate(-18,650,158)">night bus ✦ 8 hrs</text>
 
-                    <!-- COMPASS -->
                     <g transform="translate(50,50)">
                         <circle r="22" fill="rgba(0,20,40,0.7)" stroke="rgba(93,202,165,0.2)" stroke-width="1"/>
                         <text y="-10" text-anchor="middle" font-size="9" fill="rgba(93,202,165,0.7)" font-family="sans-serif" font-weight="bold">N</text>
@@ -994,7 +1003,6 @@
                         <polygon points="0,-16 3,0 0,3 -3,0" fill="rgba(93,202,165,0.8)"/>
                     </g>
 
-                    <!-- SCALE -->
                     <g transform="translate(800,390)">
                         <line x1="-60" y1="0" x2="0" y2="0" stroke="rgba(93,202,165,0.4)" stroke-width="1.5"/>
                         <line x1="-60" y1="-4" x2="-60" y2="4" stroke="rgba(93,202,165,0.4)" stroke-width="1.5"/>
@@ -1006,7 +1014,6 @@
                 </svg>
             </div>
 
-            <!-- BUS MAP LEGEND -->
             <div class="map-legend" style="border-color:rgba(93,202,165,0.2);">
                 <div class="map-legend-title bus-lt">Routes</div>
                 <div class="legend-row"><span class="legend-dot" style="background:rgba(93,202,165,0.9);"></span>→ Pollachi</div>
@@ -1023,7 +1030,76 @@
 <footer>Every road, every bus, every mile — all of it with you 🌙 💙</footer>
 
 <script>
-/* STARS */
+/* ══════════════════════════ MUSIC PLAYER ══════════════════════════ */
+const bgMusic = document.getElementById('bgMusic');
+const musicBtn = document.getElementById('musicBtn');
+let musicPlaying = false, musicStarted = false, noteInterval = null;
+
+function startMusic() {
+    bgMusic.volume = 0.45;
+    bgMusic.play().then(() => {
+        musicPlaying = true;
+        musicStarted = true;
+        musicBtn.textContent = '🎵';
+        musicBtn.classList.remove('muted');
+        startNotes();
+        document.removeEventListener('click', tryAutoMusic);
+        document.removeEventListener('touchstart', tryAutoMusic);
+    }).catch(() => {
+        musicBtn.textContent = '🔇';
+        musicBtn.classList.add('muted');
+    });
+}
+
+function toggleMusic() {
+    if (!musicStarted) {
+        startMusic();
+        return;
+    }
+    if (musicPlaying) {
+        bgMusic.pause();
+        musicPlaying = false;
+        musicBtn.textContent = '🔇';
+        musicBtn.classList.add('muted');
+        if (noteInterval) { clearInterval(noteInterval); noteInterval = null; }
+    } else {
+        bgMusic.play();
+        musicPlaying = true;
+        musicBtn.textContent = '🎵';
+        musicBtn.classList.remove('muted');
+        startNotes();
+    }
+}
+
+function startNotes() {
+    if (noteInterval) clearInterval(noteInterval);
+    noteInterval = setInterval(() => {
+        if (!musicPlaying) return;
+        const note = document.createElement('div');
+        note.className = 'music-note';
+        const notes = ['♪', '♫', '♬', '🎵', '🎶'];
+        note.textContent = notes[Math.floor(Math.random() * notes.length)];
+        const rect = musicBtn.getBoundingClientRect();
+        note.style.left = (rect.left + rect.width / 2) + 'px';
+        note.style.top = (rect.top + rect.height / 2) + 'px';
+        note.style.position = 'fixed';
+        note.style.color = Math.random() < 0.5 ? 'rgba(168,212,255,0.9)' : 'rgba(244,160,176,0.9)';
+        note.style.textShadow = '0 0 10px rgba(100,180,255,0.7)';
+        note.style.pointerEvents = 'none';
+        const nx = (Math.random() * 100 - 80) + 'px';
+        const ny = -(Math.random() * 80 + 40) + 'px';
+        note.style.setProperty('--nx', nx);
+        note.style.setProperty('--ny', ny);
+        document.body.appendChild(note);
+        setTimeout(() => note.remove(), 3000);
+    }, 800);
+}
+
+function tryAutoMusic() { if (!musicStarted) startMusic(); }
+document.addEventListener('click', tryAutoMusic);
+document.addEventListener('touchstart', tryAutoMusic);
+
+/* ══════════════════════════ STARS ══════════════════════════ */
 (function initStars() {
     const c = document.getElementById('starCanvas');
     const ctx = c.getContext('2d');
@@ -1031,34 +1107,34 @@
     function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
     resize(); window.addEventListener('resize', resize);
     for (let i = 0; i < 220; i++) {
-        stars.push({ x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.8+.2, a:Math.random(), da:Math.random()*.007+.002, col:Math.random()<.5?'180,220,255':'255,255,255' });
+        stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.8 + .2, a: Math.random(), da: Math.random() * .007 + .002, col: Math.random() < .5 ? '180,220,255' : '255,255,255' });
     }
     setInterval(() => {
-        if (Math.random() < .4) shooters.push({ x:Math.random()*W, y:0, vx:-(Math.random()*6+3), vy:Math.random()*4+3, len:Math.random()*150+80, a:1, col:Math.random()<.4?'100,180,255':'255,255,255' });
+        if (Math.random() < .4) shooters.push({ x: Math.random() * W, y: 0, vx: -(Math.random() * 6 + 3), vy: Math.random() * 4 + 3, len: Math.random() * 150 + 80, a: 1, col: Math.random() < .4 ? '100,180,255' : '255,255,255' });
     }, 600);
     (function draw() {
-        ctx.clearRect(0,0,W,H);
+        ctx.clearRect(0, 0, W, H);
         stars.forEach(s => {
-            s.a += s.da; if (s.a>1||s.a<0) s.da *= -1;
-            ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-            ctx.fillStyle = `rgba(${s.col},${s.a*.85})`; ctx.fill();
+            s.a += s.da; if (s.a > 1 || s.a < 0) s.da *= -1;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${s.col},${s.a * .85})`; ctx.fill();
         });
-        shooters.forEach((s,i) => {
+        shooters.forEach((s, i) => {
             s.x += s.vx; s.y += s.vy; s.a -= .009;
-            if (s.a <= 0 || s.y > H) { shooters.splice(i,1); return; }
-            ctx.beginPath(); ctx.moveTo(s.x,s.y);
-            ctx.lineTo(s.x-s.vx*(s.len/8), s.y-s.vy*(s.len/8));
-            const g = ctx.createLinearGradient(s.x,s.y,s.x-s.vx*(s.len/8),s.y-s.vy*(s.len/8));
-            g.addColorStop(0,`rgba(${s.col},${s.a})`); g.addColorStop(1,'transparent');
+            if (s.a <= 0 || s.y > H) { shooters.splice(i, 1); return; }
+            ctx.beginPath(); ctx.moveTo(s.x, s.y);
+            ctx.lineTo(s.x - s.vx * (s.len / 8), s.y - s.vy * (s.len / 8));
+            const g = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * (s.len / 8), s.y - s.vy * (s.len / 8));
+            g.addColorStop(0, `rgba(${s.col},${s.a})`); g.addColorStop(1, 'transparent');
             ctx.strokeStyle = g; ctx.lineWidth = 2; ctx.stroke();
-            ctx.beginPath(); ctx.arc(s.x,s.y,2.5,0,Math.PI*2);
+            ctx.beginPath(); ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255,255,255,${s.a})`; ctx.fill();
         });
         requestAnimationFrame(draw);
     })();
 })();
 
-/* SCROLL REVEAL */
+/* ══════════════════════════ SCROLL REVEAL ══════════════════════════ */
 (function initScrollReveal() {
     const els = document.querySelectorAll('.reveal');
     const obs = new IntersectionObserver(entries => {
@@ -1067,16 +1143,16 @@
     els.forEach(el => obs.observe(el));
 })();
 
-/* HEARTS ON CLICK */
+/* ══════════════════════════ HEARTS ON CLICK ══════════════════════════ */
 document.addEventListener('click', e => {
-    if (e.target.closest('.back-btn')) return;
+    if (e.target.closest('.back-btn') || e.target.closest('#musicBtn')) return;
     for (let i = 0; i < 4; i++) {
         const h = document.createElement('div');
         h.className = 'float-heart';
-        h.textContent = ['💙','✨','🌙','💖','⭐'][Math.floor(Math.random()*5)];
-        h.style.left = (e.clientX + Math.random()*30-15) + 'px';
+        h.textContent = ['💙', '✨', '🌙', '💖', '⭐'][Math.floor(Math.random() * 5)];
+        h.style.left = (e.clientX + Math.random() * 30 - 15) + 'px';
         h.style.top = (e.clientY + window.scrollY) + 'px';
-        h.style.position = 'absolute'; h.style.fontSize = (Math.random()*.8+.6)+'rem';
+        h.style.position = 'absolute'; h.style.fontSize = (Math.random() * .8 + .6) + 'rem';
         h.style.pointerEvents = 'none';
         document.body.appendChild(h);
         setTimeout(() => h.remove(), 4000);

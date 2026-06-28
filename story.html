@@ -31,14 +31,12 @@
             min-height: 100vh;
         }
 
-        /* ═══ STARS ═══ */
         #starCanvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none; z-index: 1;
         }
 
-        /* ═══ ATMOSPHERE ═══ */
         .mist-layer {
             position: fixed; bottom: 0; left: 0; right: 0; height: 40vh;
             pointer-events: none; z-index: 4;
@@ -160,7 +158,7 @@
             box-shadow: 0 0 35px rgba(50,150,255,0.5), 0 4px 30px rgba(0,60,200,0.25);
         }
 
-        /* ═══ HERO VIDEO CARD ═══ */
+        /* ═══ HERO ═══ */
         .hero {
             position: relative;
             width: 100vw;
@@ -196,7 +194,6 @@
             pointer-events: none;
         }
 
-        /* Adapt the existing hero content inside the hud */
         .hero-eyebrow {
             font-family: 'Cormorant Garamond', serif;
             font-size: 0.85rem; letter-spacing: 0.3em;
@@ -257,7 +254,7 @@
             font-size: 1.1rem; backdrop-filter: blur(10px);
             transition: transform .2s, background .2s;
             cursor: default;
-            pointer-events: auto; /* Allow hovering even in hud */
+            pointer-events: auto;
         }
         .hero-emoji-pill:hover {
             transform: translateY(-3px) scale(1.08);
@@ -291,47 +288,30 @@
         .hero-glass-badge::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
+            top: 0; left: 0; right: 0; height: 1px;
             border-radius: 50px;
             background: linear-gradient(90deg, transparent, rgba(150,200,255,.35), transparent);
         }
         .hgb-name {
             font-family: 'Dancing Script', cursive;
-            font-size: 1.25rem;
-            color: var(--moonlight);
+            font-size: 1.25rem; color: var(--moonlight);
             text-shadow: 0 0 12px rgba(100,180,255,.6);
         }
-        .hgb-icons {
-            font-size: 1.1rem;
-            letter-spacing: .25rem;
-        }
+        .hgb-icons { font-size: 1.1rem; letter-spacing: .25rem; }
 
         .scroll-cue {
             position: absolute;
-            bottom: 5rem;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 5rem; left: 50%; transform: translateX(-50%);
             z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: .4rem;
+            display: flex; flex-direction: column; align-items: center; gap: .4rem;
             animation: cuePulse 2.5s ease-in-out infinite;
             color: rgba(150,200,255,0.5);
-            font-size: .75rem;
-            letter-spacing: .15em;
-            font-family: 'Cormorant Garamond', serif;
-            font-style: italic;
+            font-size: .75rem; letter-spacing: .15em;
+            font-family: 'Cormorant Garamond', serif; font-style: italic;
             pointer-events: none;
         }
         .scroll-cue::after {
-            content: '';
-            display: block;
-            width: 1px;
-            height: 32px;
+            content: ''; display: block; width: 1px; height: 32px;
             background: linear-gradient(to bottom, rgba(100,180,255,0.5), transparent);
         }
         @keyframes cuePulse {
@@ -339,11 +319,8 @@
             50% { opacity:1; transform:translateX(-50%) translateY(6px) }
         }
 
-        /* ═══ CONTENT AREA ═══ */
-        .content {
-            position: relative; z-index: 10;
-            padding: 0 2rem 4rem;
-        }
+        /* ═══ CONTENT ═══ */
+        .content { position: relative; z-index: 10; padding: 0 2rem 4rem; }
         .container { max-width: 900px; margin: 0 auto; }
 
         .section-label {
@@ -407,10 +384,8 @@
         }
 
         .dine-movie-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 2rem;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1.5rem; margin-top: 2rem;
         }
         .dine-card {
             background: linear-gradient(135deg, rgba(0,30,80,0.5), rgba(0,10,40,0.6));
@@ -433,8 +408,7 @@
         .dine-card .dine-card-glow { background: #4a9eff; }
         .movie-card .dine-card-glow { background: #c4b5fd; }
         .dine-card-header {
-            display: flex; align-items: center; gap: 0.8rem;
-            margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem;
         }
         .dine-card-icon {
             width: 44px; height: 44px; border-radius: 14px;
@@ -443,10 +417,7 @@
         }
         .dine-card .dine-card-icon { background: rgba(74,158,255,0.15); box-shadow: 0 0 20px rgba(74,158,255,0.2); }
         .movie-card .dine-card-icon { background: rgba(196,181,253,0.15); box-shadow: 0 0 20px rgba(196,181,253,0.2); }
-        .dine-card-title {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.4rem;
-        }
+        .dine-card-title { font-family: 'Dancing Script', cursive; font-size: 1.4rem; }
         .dine-card .dine-card-title { color: var(--blue-soft); }
         .movie-card .dine-card-title { color: var(--lavender); }
         .place-list { list-style: none; }
@@ -461,10 +432,7 @@
             color: rgba(200,230,255,0.8);
             transition: background .2s, transform .2s;
         }
-        .place-item:hover {
-            background: rgba(100,180,255,0.08);
-            transform: translateX(4px);
-        }
+        .place-item:hover { background: rgba(100,180,255,0.08); transform: translateX(4px); }
         .place-item .place-emoji { font-size: 1.2rem; }
         .movie-card .place-item:hover { background: rgba(196,181,253,0.08); }
 
@@ -517,17 +485,15 @@
     <div class="moonray" style="--a:18deg;left:75%;"></div>
     <canvas id="starCanvas"></canvas>
 
-    <!-- AUDIO ELEMENT -->
     <audio id="bgMusic" loop>
         <source src="sty.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- BACK BUTTON (above everything) -->
     <a id="backBtn" href="index.html">🌙 Return to Our World</a>
 
-    <!-- ═══ HERO VIDEO CARD ═══ -->
+    <!-- ═══ HERO ═══ -->
     <section class="hero">
-        <video class="hero-video-bg" autoplay loop muted playsinline>
+        <video class="hero-video-bg" id="heroVideo" autoplay muted playsinline>
             <source src="stry.mp4" type="video/mp4">
         </video>
         <div class="hero-overlay"></div>
@@ -558,7 +524,6 @@
         <div class="container">
             <div class="section-label">💌 our stories 💌</div>
 
-            <!-- Story 1 -->
             <div class="glass-card card-rain">
                 <div class="story-title">🌧️ Rain & Gulab Jamun</div>
                 <div class="story-meta">⭐ chapter one · our rainy world</div>
@@ -576,7 +541,6 @@ I teased the tofi with it, then pushed in gently, pulling out, pushing again —
 We hugged tight, breathless and tender, and fell asleep tangled in pain and pleasure. Four hours later I slipped out, leaving a kiss on your forehead. That's what I did — what we did — and it was ours. 🌙</div>
             </div>
 
-            <!-- Story 2 -->
             <div class="glass-card card-dream">
                 <div class="story-title">✨ Dream & The Wedding</div>
                 <div class="story-meta">💫 chapter two · the dream that became real</div>
@@ -600,7 +564,6 @@ The next day we flew to France. Mountains, bungee jumping, paragliding — we di
 At the Eiffel Tower, we ate gulab jamun while looking over the entire city of Paris. The dream had come true — we had our whole world in each other. 🗼💕</div>
             </div>
 
-            <!-- Story 3 -->
             <div class="glass-card card-demon">
                 <div class="story-title">👿 The Demon & The Hug</div>
                 <div class="story-meta">💜 chapter three · the night the demon came</div>
@@ -611,7 +574,6 @@ Your finger traced from my throat down to the badham paal, teasing, remembering 
 We moved together, slow and deliberate, lost in each other. 💫</div>
             </div>
 
-            <!-- DINE & MOVIE SECTION -->
             <div class="section-label">🗺️ our places 🗺️</div>
             <div class="dine-movie-grid">
                 <div class="dine-card">
@@ -667,7 +629,6 @@ We moved together, slow and deliberate, lost in each other. 💫</div>
         Whispered only for you, Ammukutty 🌙 · written with every star above ✨
     </footer>
 
-    <!-- Floating particles -->
     <div class="particle" style="left:5%;animation-delay:0s;animation-duration:14s;">🌸</div>
     <div class="particle" style="left:20%;animation-delay:2s;animation-duration:11s;">💫</div>
     <div class="particle" style="left:40%;animation-delay:5s;animation-duration:16s;">⭐</div>
@@ -676,8 +637,14 @@ We moved together, slow and deliberate, lost in each other. 💫</div>
     <div class="particle" style="left:90%;animation-delay:3s;animation-duration:15s;">✨</div>
 
     <script>
-    // ═══ STARS ═══
-    (function() {
+    /* ═══ FREEZE VIDEO ON LAST FRAME ═══ */
+    const heroVideo = document.getElementById('heroVideo');
+    heroVideo.addEventListener('ended', function () {
+        this.pause();
+    });
+
+    /* ═══ STARS ═══ */
+    (function () {
         const canvas = document.getElementById('starCanvas');
         const ctx = canvas.getContext('2d');
         let W, H, stars = [], shooters = [];
@@ -720,8 +687,12 @@ We moved together, slow and deliberate, lost in each other. 💫</div>
         draw();
     })();
 
-    // ═══ FLOATING HEARTS ON CLICK ═══
+    /* ═══ FLOATING HEARTS ON CLICK ═══ */
     const emojis = ['💖','💙','✨','🌸','💜','⭐','💫','🌙','💕','🌟','💞','🦋'];
+    const floatStyle = document.createElement('style');
+    floatStyle.textContent = `@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);}100%{opacity:0;transform:translateY(-75vh) scale(.4) rotate(25deg);}}`;
+    document.head.appendChild(floatStyle);
+
     document.addEventListener('click', function(e) {
         if (e.target.closest('#backBtn') || e.target.closest('#musicBtn')) return;
         for (let i = 0; i < 6; i++) {
@@ -733,11 +704,7 @@ We moved together, slow and deliberate, lost in each other. 💫</div>
         }
     });
 
-    const s = document.createElement('style');
-    s.textContent = `@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);}100%{opacity:0;transform:translateY(-75vh) scale(.4) rotate(25deg);}}`;
-    document.head.appendChild(s);
-
-    // ═══ MUSIC PLAYER ═══
+    /* ═══ MUSIC PLAYER ═══ */
     const bgMusic = document.getElementById('bgMusic');
     const musicBtn = document.createElement('button');
     musicBtn.id = 'musicBtn';
@@ -763,7 +730,8 @@ We moved together, slow and deliberate, lost in each other. 💫</div>
         });
     }
 
-    musicBtn.addEventListener('click', function() {
+    musicBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
         if (!musicStarted) { startMusic(); return; }
         if (musicPlaying) {
             bgMusic.pause();
@@ -795,7 +763,8 @@ We moved together, slow and deliberate, lost in each other. 💫</div>
             note.style.color = Math.random() < 0.5 ? 'rgba(168,212,255,0.9)' : 'rgba(244,160,176,0.9)';
             note.style.textShadow = '0 0 10px rgba(244,160,176,0.7)';
             note.style.pointerEvents = 'none';
-            const nx = (Math.random()*100-80) + 'px', ny = -(Math.random()*80+40) + 'px';
+            const nx = (Math.random()*100-80) + 'px';
+            const ny = -(Math.random()*80+40) + 'px';
             note.style.setProperty('--nx', nx);
             note.style.setProperty('--ny', ny);
             document.body.appendChild(note);

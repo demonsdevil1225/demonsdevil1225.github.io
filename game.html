@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Maze 💙</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#00050f;
+  --moonlight:#a8d4ff;
+  --rose:#f4a0b0;
+  --gold:#ffd97d;
+  --soft:#e8f4ff;
+  --violet:#c084fc;
+  --bubbly:#ff4d6d;
+  --ammu:#4a9eff;
+  --wall:#0a1f4e;
+  --path:#000d2e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{
+  background:radial-gradient(ellipse at 50% 0%,#001535 0%,#000a1e 40%,#00050f 100%);
+  font-family:'Cormorant Garamond',serif;
+  color:var(--soft);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;
+  user-select:none;
+}
+#starCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+.aurora{position:fixed;top:0;left:0;right:0;height:60vh;pointer-events:none;z-index:1;overflow:hidden;opacity:0.12;}
+.aurora-band{position:absolute;left:-20%;right:-20%;height:200px;border-radius:50%;filter:blur(60px);animation:auroraDrift 12s ease-in-out infinite alternate;}
+.aurora-band:nth-child(1){top:5%;background:rgba(50,120,255,0.6);}
+.aurora-band:nth-child(2){top:10%;background:rgba(192,132,252,0.45);animation-delay:-4s;}
+.aurora-band:nth-child(3){top:2%;background:rgba(244,160,176,0.3);animation-delay:-8s;}
+@keyframes auroraDrift{0%{transform:translateX(-8%) scaleY(1)}50%{transform:translateX(5%) scaleY(1.3)}100%{transform:translateX(-3%) scaleY(0.8)}}
+
+/* BACK */
+.back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:9999;
+  background:rgba(0,20,60,0.65);border:1px solid rgba(100,180,255,0.25);
+  backdrop-filter:blur(16px);color:var(--moonlight);font-family:'Dancing Script',cursive;font-size:.9rem;
+  padding:.45rem 1rem;border-radius:50px;cursor:pointer;text-decoration:none;
+  display:flex;align-items:center;gap:.35rem;transition:all .25s;}
+.back-btn:hover{background:rgba(0,40,100,0.85);transform:translateX(-3px);}
+
+/* GAME WRAPPER */
+.game-wrap{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:.7rem;padding:1rem;}
+
+/* TITLE */
+.game-title{font-family:'Dancing Script',cursive;font-size:clamp(1.4rem,4vw,2.2rem);
+  background:linear-gradient(135deg,#f4a0b0,#a8d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 16px rgba(244,160,176,.4));text-align:center;line-height:1.2;}
+
+/* CONNECTION STATUS */
+.conn-status{display:flex;align-items:center;gap:.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.85rem;}
+.conn-dot{width:10px;height:10px;border-radius:50%;transition:background .3s;}
+.conn-dot.off{background:#555;}
+.conn-dot.connecting{background:#ffd97d;animation:pulse 1s infinite;}
+.conn-dot.on{background:#4ade80;box-shadow:0 0 8px #4ade8088;}
+.conn-dot.playing{background:#4a9eff;box-shadow:0 0 8px #4a9eff88;}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* PLAYER INFO BAR */
+.players-bar{display:flex;gap:2rem;align-items:center;justify-content:center;}
+.player-tag{display:flex;align-items:center;gap:.5rem;background:rgba(0,20,60,0.45);
+  border-radius:50px;padding:.35rem 1rem;border:1px solid rgba(255,255,255,0.08);
+  font-family:'Dancing Script',cursive;font-size:1rem;}
+.player-dot{width:12px;height:12px;border-radius:50%;}
+.p-bubbly .player-dot{background:var(--bubbly);box-shadow:0 0 10px rgba(255,77,109,.7);}
+.p-ammu .player-dot{background:var(--ammu);box-shadow:0 0 10px rgba(74,158,255,.7);}
+.player-name{color:#fff;}
+.player-status{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;color:rgba(255,255,255,.35);}
+.player-status.done{color:var(--gold);}
+.player-tag.you{border-color:rgba(255,255,255,0.3);box-shadow:0 0 12px rgba(255,255,255,0.06);}
+
+/* CONTROLS HINT */
+.controls-hint{display:flex;gap:2rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.78rem;color:rgba(150,200,255,.4);text-align:center;}
+.ctrl{display:flex;flex-direction:column;align-items:center;gap:.15rem;}
+.ctrl-keys{display:flex;gap:.2rem;justify-content:center;}
+.key{background:rgba(0,30,80,0.6);border:1px solid rgba(100,180,255,0.2);border-radius:5px;
+  padding:.15rem .35rem;font-size:.7rem;color:rgba(180,220,255,.7);font-family:monospace;}
+
+/* CANVAS */
+#mazeCanvas{
+  border-radius:14px;
+  border:1px solid rgba(100,180,255,0.15);
+  box-shadow:0 0 40px rgba(0,60,200,.25),0 0 80px rgba(0,20,80,.3);
+  display:block;
+  image-rendering:pixelated;
+}
+
+/* WIN OVERLAY */
+#winOverlay{
+  position:fixed;inset:0;z-index:99999;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;
+  background:rgba(0,5,20,0.88);backdrop-filter:blur(16px);
+  animation:fadeIn .5s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#winOverlay.show{display:flex;}
+.win-heart{font-size:clamp(4rem,12vw,8rem);animation:heartBeat .6s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 30px rgba(192,132,252,.8));}
+@keyframes heartBeat{0%{transform:scale(1)}100%{transform:scale(1.15)}}
+.win-title{font-family:'Dancing Script',cursive;font-size:clamp(2rem,7vw,4.5rem);
+  background:linear-gradient(135deg,#f4a0b0,#c084fc,#a8d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(192,132,252,.5));text-align:center;line-height:1.1;}
+.win-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1rem,2.5vw,1.4rem);
+  color:rgba(220,200,255,.7);text-align:center;}
+.win-play-again{
+  background:rgba(40,0,80,0.5);border:1px solid rgba(192,132,252,0.4);
+  color:var(--violet);font-family:'Dancing Script',cursive;font-size:1.1rem;
+  padding:.7rem 2rem;border-radius:50px;cursor:pointer;
+  transition:all .25s;backdrop-filter:blur(10px);}
+.win-play-again:hover{background:rgba(80,0,140,0.6);transform:scale(1.05);}
+
+/* FLOATING HEARTS */
+.float-heart{position:fixed;pointer-events:none;z-index:99998;animation:floatUp 4s ease-in forwards;}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(-90vh) rotate(20deg) scale(.4)}}
+
+/* MOBILE DPAD */
+.dpad-wrap{display:none;flex-direction:column;align-items:center;gap:.4rem;z-index:10;position:relative;}
+.dpad-row{display:flex;gap:.4rem;}
+.dpad-btn{width:52px;height:52px;border-radius:12px;border:1px solid rgba(100,180,255,0.2);
+  background:rgba(0,20,60,0.55);backdrop-filter:blur(10px);
+  color:rgba(180,220,255,.8);font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;}
+.dpad-btn:active{background:rgba(0,60,160,0.5);transform:scale(.93);}
+.dpad-btn.bubbly-btn{border-color:rgba(255,77,109,0.35);color:rgba(255,120,140,.8);}
+.dpad-btn.bubbly-btn:active{background:rgba(100,0,30,0.5);}
+.dpad-spacer{width:52px;height:52px;}
+.dpad-label{font-family:'Dancing Script',cursive;font-size:.85rem;text-align:center;opacity:.5;margin-top:.15rem;}
+.dpad-section{display:flex;flex-direction:column;align-items:center;gap:.15rem;}
+.dpad-both{display:flex;gap:2rem;align-items:flex-start;}
+
+@media(max-width:700px),(max-height:600px){
+  .dpad-wrap{display:flex;}
+  .controls-hint{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"><div class="aurora-band"></div><div class="aurora-band"></div><div class="aurora-band"></div></div>
+<canvas id="starCanvas"></canvas>
+
+<a href="index.html" class="back-btn">← Home</a>
+
+<div id="winOverlay">
+  <div class="win-heart">💜</div>
+  <div class="win-title">We Won! 💜</div>
+  <div class="win-sub">Bubbly &amp; Ammu — together through every maze 🌙</div>
+  <button class="win-play-again" onclick="location.reload()">↻ Play Again</button>
+</div>
+
+<div class="game-wrap">
+  <div class="game-title">Find Each Other 💙<br><span style="font-size:.6em;color:rgba(200,220,255,.5);">a maze for two</span></div>
+
+  <div class="conn-status">
+    <span class="conn-dot off" id="connDot"></span>
+    <span id="connText">Connecting...</span>
+  </div>
+
+  <div class="players-bar">
+    <div class="player-tag p-bubbly" id="tagB">
+      <div class="player-dot"></div>
+      <span class="player-name">Bubbly</span>
+      <span class="player-status" id="statusBubbly">⏳</span>
+    </div>
+    <span style="color:rgba(255,255,255,.2);font-size:1.2rem;">✦</span>
+    <div class="player-tag p-ammu" id="tagA">
+      <div class="player-dot"></div>
+      <span class="player-name">Ammu</span>
+      <span class="player-status" id="statusAmmu">⏳</span>
+    </div>
+  </div>
+
+  <div class="controls-hint" id="ctrlHint">
+    <div class="ctrl" id="ctrlB">
+      <div class="ctrl-keys"><span class="key" style="color:rgba(255,120,140,.8);">W</span></div>
+      <div class="ctrl-keys"><span class="key" style="color:rgba(255,120,140,.8);">A</span><span class="key" style="color:rgba(255,120,140,.8);">S</span><span class="key" style="color:rgba(255,120,140,.8);">D</span></div>
+      <span>Bubbly 🔴</span>
+    </div>
+    <div class="ctrl" id="ctrlA">
+      <div class="ctrl-keys"><span class="key" style="color:rgba(100,180,255,.8);">↑</span></div>
+      <div class="ctrl-keys"><span class="key" style="color:rgba(100,180,255,.8);">←</span><span class="key" style="color:rgba(100,180,255,.8);">↓</span><span class="key" style="color:rgba(100,180,255,.8);">→</span></div>
+      <span>Ammu 🔵</span>
+    </div>
+  </div>
+
+  <canvas id="mazeCanvas"></canvas>
+
+  <!-- MOBILE DPAD -->
+  <div class="dpad-wrap" id="dpadWrap">
+    <div class="dpad-both">
+      <div class="dpad-section" id="dpadB">
+        <div class="dpad-row"><div class="dpad-spacer"></div><button class="dpad-btn bubbly-btn" data-d="up">▲</button><div class="dpad-spacer"></div></div>
+        <div class="dpad-row"><button class="dpad-btn bubbly-btn" data-d="left">◀</button><button class="dpad-btn bubbly-btn" data-d="down">▼</button><button class="dpad-btn bubbly-btn" data-d="right">▶</button></div>
+        <div class="dpad-label" style="color:rgba(255,120,140,.6);">Bubbly 🔴</div>
+      </div>
+      <div class="dpad-section" id="dpadA">
+        <div class="dpad-row"><div class="dpad-spacer"></div><button class="dpad-btn" data-d="up">▲</button><div class="dpad-spacer"></div></div>
+        <div class="dpad-row"><button class="dpad-btn" data-d="left">◀</button><button class="dpad-btn" data-d="down">▼</button><button class="dpad-btn" data-d="right">▶</button></div>
+        <div class="dpad-label" style="color:rgba(100,180,255,.6);">Ammu 🔵</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ CONFIG ═══ */
+const SERVER_URL = (() => {
+  const p = new URLSearchParams(location.search);
+  if (p.has('server')) return p.get('server');
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${location.host}/ws`;
+})();
+
+/* ═══ STARS ═══ */
+(function(){
+  const c=document.getElementById('starCanvas'),ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=[];
+    for(let i=0;i<180;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.2,a:Math.random(),da:Math.random()*.006+.002,col:Math.random()<.5?'180,220,255':'255,255,255'});}
+  resize();window.addEventListener('resize',resize);
+  (function draw(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{s.a+=s.da;if(s.a>1||s.a<0)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(${s.col},${s.a*.8})`;ctx.fill();});requestAnimationFrame(draw);})();
+})();
+
+/* ═══ MAZE CONSTANTS ═══ */
+const COLS = 21, ROWS = 21;
+let maze = [];
+
+/* ═══ CANVAS SETUP ═══ */
+const canvas = document.getElementById('mazeCanvas');
+const ctx = canvas.getContext('2d');
+
+function getCellSize() {
+  const maxW = Math.min(window.innerWidth - 32, 560);
+  const maxH = window.innerHeight - 280;
+  return Math.max(10, Math.min(Math.floor(maxW / COLS), Math.floor(maxH / ROWS)));
+}
+
+let CELL = getCellSize();
+
+/* ═══ PLAYERS ═══ */
+let playerId = null;
+const players = {
+  b: { x:1, y:1, color:'#ff4d6d', glow:'rgba(255,77,109,.6)', done:false, trail:[] },
+  a: { x:COLS-2, y:ROWS-2, color:'#4a9eff', glow:'rgba(74,158,255,.6)', done:false, trail:[] }
+};
+const goals = {
+  b: { x:COLS-2, y:ROWS-2 },
+  a: { x:1,      y:1      }
+};
+
+/* ═══ DRAW ═══ */
+function draw() {
+  if (!maze.length) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#000d2e';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let row=0; row<ROWS; row++) {
+    for (let col=0; col<COLS; col++) {
+      if (maze[row][col] === 0) {
+        ctx.fillStyle = '#07183d';
+        ctx.fillRect(col*CELL, row*CELL, CELL, CELL);
+        ctx.fillStyle = 'rgba(30,80,180,0.12)';
+        ctx.fillRect(col*CELL+1, row*CELL+1, CELL-2, CELL-2);
+      } else {
+        ctx.fillStyle = '#000d2e';
+        ctx.fillRect(col*CELL, row*CELL, CELL, CELL);
+      }
+    }
+  }
+
+  drawGoal(goals.b.x, goals.b.y, players.b.color);
+  drawGoal(goals.a.x, goals.a.y, players.a.color);
+
+  ['b','a'].forEach(id => {
+    const p = players[id];
+    p.trail.forEach((t, i) => {
+      const alpha = (i / Math.max(p.trail.length, 1)) * 0.18;
+      const aHex = Math.floor(alpha * 255).toString(16).padStart(2,'0');
+      ctx.fillStyle = p.color + aHex;
+      ctx.fillRect(t.x*CELL + CELL*.25, t.y*CELL + CELL*.25, CELL*.5, CELL*.5);
+    });
+  });
+
+  ['b','a'].forEach(id => drawPlayer(id));
+}
+
+function drawGoal(x, y, color) {
+  const cx = x*CELL + CELL/2, cy = y*CELL + CELL/2, r = CELL*.38;
+  ctx.save();
+  ctx.globalAlpha = .5 + .2*Math.sin(Date.now()*.003);
+  const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,r*2);
+  grd.addColorStop(0, color+'66'); grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(cx,cy,r*2,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = color+'99'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle = color+'bb'; ctx.font = `${Math.floor(CELL*.5)}px serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('♡', cx, cy+1);
+  ctx.restore();
+}
+
+function drawPlayer(id) {
+  const p = players[id];
+  const cx = p.x*CELL + CELL/2, cy = p.y*CELL + CELL/2, r = CELL*.4;
+  ctx.save();
+  const pulse = .7 + .3*Math.sin(Date.now()*.004 + (id==='b'?0:Math.PI));
+  const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,r*2.5);
+  grd.addColorStop(0, p.color+'88'); grd.addColorStop(1,'transparent');
+  ctx.globalAlpha = pulse;
+  ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(cx,cy,r*2.5,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = p.color;
+  ctx.shadowColor = p.glow; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fff';
+  ctx.font = `bold ${Math.floor(CELL*.45)}px 'Dancing Script', cursive`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(id==='b'?'B':'A', cx, cy+1);
+  if (p.done) {
+    ctx.fillStyle='#ffd97d'; ctx.font=`${Math.floor(CELL*.4)}px serif`;
+    ctx.fillText('✓', cx+r*.7, cy-r*.7);
+  }
+  ctx.restore();
+}
+
+/* ═══ NETWORKING ═══ */
+let ws = null;
+let reconnectTimer = null;
+
+function setConn(state) {
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connText');
+  dot.className = 'conn-dot';
+  if (state === 'off') { dot.classList.add('off'); txt.textContent = 'Disconnected'; }
+  else if (state === 'connecting') { dot.classList.add('connecting'); txt.textContent = 'Connecting...'; }
+  else if (state === 'connected') { dot.classList.add('on'); txt.textContent = 'Waiting for partner...'; }
+  else if (state === 'playing') { dot.classList.add('playing'); txt.textContent = 'Playing 💫'; }
+}
+
+function connect() {
+  setConn('connecting');
+  if (ws) { ws.onclose = null; ws.close(); }
+  ws = new WebSocket(SERVER_URL);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({type:'join', game:'maze'}));
+    setConn('connected');
+  };
+
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    switch (d.type) {
+      case 'init':
+        playerId = d.player;
+        maze = d.maze;
+        Object.assign(players.b, d.players.b);
+        Object.assign(players.a, d.players.a);
+        Object.assign(goals, d.goals);
+        CELL = getCellSize();
+        canvas.width = COLS * CELL;
+        canvas.height = ROWS * CELL;
+        document.getElementById('tag' + d.player.toUpperCase()).classList.add('you');
+        setConn('connected');
+        draw();
+        break;
+      case 'start':
+        setConn('playing');
+        document.getElementById('statusBubbly').textContent = 'WASD';
+        document.getElementById('statusAmmu').textContent = '↑↓←→';
+        break;
+      case 'update':
+        if (d.players.b) Object.assign(players.b, d.players.b);
+        if (d.players.a) Object.assign(players.a, d.players.a);
+        if (players.b.done) {
+          document.getElementById('statusBubbly').textContent = '✓ Done!';
+          document.getElementById('statusBubbly').classList.add('done');
+        }
+        if (players.a.done) {
+          document.getElementById('statusAmmu').textContent = '✓ Done!';
+          document.getElementById('statusAmmu').classList.add('done');
+        }
+        draw();
+        break;
+      case 'win':
+        showWin();
+        break;
+    }
+  };
+
+  ws.onclose = () => {
+    setConn('off');
+    reconnectTimer = setTimeout(connect, 2000);
+  };
+
+  ws.onerror = () => { ws.close(); };
+}
+
+/* ═══ SEND MOVE ═══ */
+function sendMove(dx, dy) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type:'move', dx, dy}));
+  }
+}
+
+/* ═══ KEYBOARD ═══ */
+const keys = {};
+window.addEventListener('keydown', e => {
+  if (!playerId) return;
+  keys[e.key] = true;
+  e.preventDefault();
+});
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+let lastMove = 0;
+const MOVE_DELAY = 120;
+
+function processKeys() {
+  if (!playerId) return;
+  const now = Date.now();
+  if (now - lastMove < MOVE_DELAY) return;
+  let moved = false;
+  if (playerId === 'b') {
+    if (keys['w']||keys['W']) { sendMove(0,-1); moved=true; }
+    else if (keys['s']||keys['S']) { sendMove(0,1); moved=true; }
+    else if (keys['a']||keys['A']) { sendMove(-1,0); moved=true; }
+    else if (keys['d']||keys['D']) { sendMove(1,0); moved=true; }
+  } else {
+    if (keys['ArrowUp'])    { sendMove(0,-1); moved=true; }
+    else if (keys['ArrowDown'])  { sendMove(0,1); moved=true; }
+    else if (keys['ArrowLeft'])  { sendMove(-1,0); moved=true; }
+    else if (keys['ArrowRight']) { sendMove(1,0); moved=true; }
+  }
+  if (moved) lastMove = now;
+}
+
+/* ═══ MOBILE DPAD ═══ */
+const dpadMap = { up:[0,-1], down:[0,1], left:[-1,0], right:[1,0] };
+document.querySelectorAll('.dpad-btn').forEach(btn => {
+  function press(e) {
+    e.preventDefault();
+    if (!playerId) return;
+    if (btn.closest('#dpadB') && playerId !== 'b') return;
+    if (btn.closest('#dpadA') && playerId !== 'a') return;
+    const dir = btn.dataset.d;
+    const [dx,dy] = dpadMap[dir];
+    sendMove(dx, dy);
+  }
+  btn.addEventListener('touchstart', press, {passive:false});
+  btn.addEventListener('mousedown', press);
+});
+
+/* ═══ WIN ═══ */
+let hasWon = false;
+function showWin() {
+  if (hasWon) return;
+  hasWon = true;
+  document.getElementById('winOverlay').classList.add('show');
+  for (let i=0;i<60;i++) setTimeout(()=>spawnWinHeart(), Math.random()*3000);
+}
+
+function spawnWinHeart() {
+  const h=document.createElement('div'); h.className='float-heart';
+  h.textContent=['💜','💙','💖','✨','🌸','💝','⭐','🎉'][Math.floor(Math.random()*8)];
+  h.style.cssText=`left:${Math.random()*100}vw;top:${70+Math.random()*25}vh;position:fixed;font-size:${Math.random()*2+1}rem;pointer-events:none;z-index:99997;`;
+  document.body.appendChild(h); setTimeout(()=>h.remove(),4200);
+}
+
+/* ═══ ANIMATION LOOP ═══ */
+function loop() {
+  processKeys();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* ═══ RESIZE ═══ */
+window.addEventListener('resize', ()=>{
+  if (!maze.length) return;
+  CELL = getCellSize();
+  canvas.width  = COLS*CELL;
+  canvas.height = ROWS*CELL;
+  draw();
+});
+
+/* ═══ CONNECT ═══ */
+connect();
+</script>
+</body>
+</html>

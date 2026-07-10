@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sudoku 💙</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#00050f;
+  --moonlight:#a8d4ff;
+  --rose:#f4a0b0;
+  --gold:#ffd97d;
+  --soft:#e8f4ff;
+  --violet:#c084fc;
+  --bubbly:#ff4d6d;
+  --ammu:#4a9eff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{
+  background:radial-gradient(ellipse at 50% 0%,#001535 0%,#000a1e 40%,#00050f 100%);
+  font-family:'Cormorant Garamond',serif;
+  color:var(--soft);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;user-select:none;
+}
+#starCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+.aurora{position:fixed;top:0;left:0;right:0;height:60vh;pointer-events:none;z-index:1;overflow:hidden;opacity:0.12;}
+.aurora-band{position:absolute;left:-20%;right:-20%;height:200px;border-radius:50%;filter:blur(60px);animation:auroraDrift 12s ease-in-out infinite alternate;}
+.aurora-band:nth-child(1){top:5%;background:rgba(50,120,255,0.6);}
+.aurora-band:nth-child(2){top:10%;background:rgba(192,132,252,0.45);animation-delay:-4s;}
+.aurora-band:nth-child(3){top:2%;background:rgba(244,160,176,0.3);animation-delay:-8s;}
+@keyframes auroraDrift{0%{transform:translateX(-8%) scaleY(1)}50%{transform:translateX(5%) scaleY(1.3)}100%{transform:translateX(-3%) scaleY(0.8)}}
+
+.back-btn{position:fixed;top:1.2rem;left:1.2rem;z-index:9999;
+  background:rgba(0,20,60,0.65);border:1px solid rgba(100,180,255,0.25);
+  backdrop-filter:blur(16px);color:var(--moonlight);font-family:'Dancing Script',cursive;font-size:.9rem;
+  padding:.45rem 1rem;border-radius:50px;cursor:pointer;text-decoration:none;
+  display:flex;align-items:center;gap:.35rem;transition:all .25s;}
+.back-btn:hover{background:rgba(0,40,100,0.85);transform:translateX(-3px);}
+
+.game-wrap{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:.5rem 1rem 1rem;}
+
+.game-title{font-family:'Dancing Script',cursive;font-size:clamp(1.3rem,3.5vw,2rem);
+  background:linear-gradient(135deg,#f4a0b0,#a8d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 16px rgba(244,160,176,.4));text-align:center;line-height:1.2;}
+
+.conn-status{display:flex;align-items:center;gap:.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.8rem;}
+.conn-dot{width:9px;height:9px;border-radius:50%;transition:background .3s;}
+.conn-dot.off{background:#555;}
+.conn-dot.connecting{background:#ffd97d;animation:pulse 1s infinite;}
+.conn-dot.on{background:#4ade80;box-shadow:0 0 8px #4ade8088;}
+.conn-dot.playing{background:#4a9eff;box-shadow:0 0 8px #4a9eff88;}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+.players-bar{display:flex;gap:1.5rem;align-items:center;justify-content:center;}
+.player-tag{display:flex;align-items:center;gap:.4rem;background:rgba(0,20,60,0.45);
+  border-radius:50px;padding:.25rem .8rem;border:1px solid rgba(255,255,255,0.08);
+  font-family:'Dancing Script',cursive;font-size:.9rem;}
+.player-dot{width:10px;height:10px;border-radius:50%;}
+.p-bubbly .player-dot{background:var(--bubbly);box-shadow:0 0 10px rgba(255,77,109,.7);}
+.p-ammu .player-dot{background:var(--ammu);box-shadow:0 0 10px rgba(74,158,255,.7);}
+.player-name{color:#fff;}
+.player-status{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.75rem;color:rgba(255,255,255,.35);}
+.player-tag.you{border-color:rgba(255,255,255,0.3);box-shadow:0 0 12px rgba(255,255,255,0.06);}
+
+#sudokuCanvas{
+  border-radius:10px;
+  border:1px solid rgba(100,180,255,0.15);
+  box-shadow:0 0 30px rgba(0,60,200,.2),0 0 60px rgba(0,20,80,.25);
+  display:block;
+  image-rendering:pixelated;
+  touch-action:none;
+}
+
+/* Numpad */
+.numpad{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:center;max-width:320px;}
+.num-btn{width:36px;height:36px;border-radius:8px;border:1px solid rgba(100,180,255,0.15);
+  background:rgba(0,20,60,0.45);backdrop-filter:blur(10px);
+  color:rgba(180,220,255,.8);font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;}
+.num-btn:active{background:rgba(0,60,160,0.5);transform:scale(.92);}
+.num-btn.erase{font-size:.8rem;color:rgba(255,120,140,.7);width:auto;padding:0 .7rem;}
+.num-btn.erase:active{background:rgba(100,0,30,0.5);}
+
+.numpad-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.7rem;
+  color:rgba(150,200,255,.35);text-align:center;margin-top:.1rem;}
+
+/* WIN OVERLAY */
+#winOverlay{
+  position:fixed;inset:0;z-index:99999;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;
+  background:rgba(0,5,20,0.88);backdrop-filter:blur(16px);
+  animation:fadeIn .5s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#winOverlay.show{display:flex;}
+.win-heart{font-size:clamp(4rem,12vw,8rem);animation:heartBeat .6s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 30px rgba(192,132,252,.8));}
+@keyframes heartBeat{0%{transform:scale(1)}100%{transform:scale(1.15)}}
+.win-title{font-family:'Dancing Script',cursive;font-size:clamp(2rem,7vw,4.5rem);
+  background:linear-gradient(135deg,#f4a0b0,#c084fc,#a8d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(192,132,252,.5));text-align:center;line-height:1.1;}
+.win-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1rem,2.5vw,1.4rem);
+  color:rgba(220,200,255,.7);text-align:center;}
+.win-play-again{
+  background:rgba(40,0,80,0.5);border:1px solid rgba(192,132,252,0.4);
+  color:var(--violet);font-family:'Dancing Script',cursive;font-size:1.1rem;
+  padding:.7rem 2rem;border-radius:50px;cursor:pointer;
+  transition:all .25s;backdrop-filter:blur(10px);}
+.win-play-again:hover{background:rgba(80,0,140,0.6);transform:scale(1.05);}
+
+.float-heart{position:fixed;pointer-events:none;z-index:99998;animation:floatUp 4s ease-in forwards;}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(-90vh) rotate(20deg) scale(.4)}}
+
+@media(max-height:650px){
+  .game-wrap{gap:.3rem;padding:.3rem .5rem .5rem;}
+  .players-bar{gap:1rem;}
+  .player-tag{padding:.2rem .6rem;font-size:.8rem;}
+  .numpad{gap:.25rem;max-width:280px;}
+  .num-btn{width:30px;height:30px;font-size:.85rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"><div class="aurora-band"></div><div class="aurora-band"></div><div class="aurora-band"></div></div>
+<canvas id="starCanvas"></canvas>
+
+<a href="index.html" class="back-btn">← Home</a>
+
+<div id="winOverlay">
+  <div class="win-heart">💜</div>
+  <div class="win-title">Sudoku Solved! 💜</div>
+  <div class="win-sub">Bubbly &amp; Ammu — puzzle champions 🌙</div>
+  <button class="win-play-again" onclick="location.reload()">↻ Play Again</button>
+</div>
+
+<div class="game-wrap">
+  <div class="game-title">Sudoku 💙<br><span style="font-size:.55em;color:rgba(200,220,255,.5);">together in every cell</span></div>
+
+  <div class="conn-status">
+    <span class="conn-dot off" id="connDot"></span>
+    <span id="connText">Connecting...</span>
+  </div>
+
+  <div class="players-bar">
+    <div class="player-tag p-bubbly" id="tagB">
+      <div class="player-dot"></div>
+      <span class="player-name">Bubbly</span>
+      <span class="player-status" id="statusB">🔴</span>
+    </div>
+    <span style="color:rgba(255,255,255,.2);font-size:1.1rem;">✦</span>
+    <div class="player-tag p-ammu" id="tagA">
+      <div class="player-dot"></div>
+      <span class="player-name">Ammu</span>
+      <span class="player-status" id="statusA">🔵</span>
+    </div>
+  </div>
+
+  <canvas id="sudokuCanvas"></canvas>
+
+  <div class="numpad" id="numpad"></div>
+  <div class="numpad-label">tap a cell, then tap a number or type it</div>
+</div>
+
+<script>
+/* ═══ CONFIG ═══ */
+const SERVER_URL = (() => {
+  const p = new URLSearchParams(location.search);
+  if (p.has('server')) return p.get('server');
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${location.host}/ws`;
+})();
+
+/* ═══ STARS ═══ */
+(function(){
+  const c=document.getElementById('starCanvas'),ctx=c.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=[];
+    for(let i=0;i<150;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.2,a:Math.random(),da:Math.random()*.006+.002,col:Math.random()<.5?'180,220,255':'255,255,255'});}
+  resize();window.addEventListener('resize',resize);
+  (function draw(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{s.a+=s.da;if(s.a>1||s.a<0)s.da*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(${s.col},${s.a*.8})`;ctx.fill();});requestAnimationFrame(draw);})();
+})();
+
+/* ═══ SUDOKU STATE ═══ */
+const SIDE = 9;
+let puzzle = [];
+let cells = { b: {}, a: {} };
+let playerId = null;
+let selected = null; // { row, col }
+
+const COLORS = {
+  b: { fill: '#ff4d6d', glow: 'rgba(255,77,109,.5)', tag: 'Bubbly' },
+  a: { fill: '#4a9eff', glow: 'rgba(74,158,255,.5)', tag: 'Ammu' }
+};
+
+/* ═══ CANVAS ═══ */
+const canvas = document.getElementById('sudokuCanvas');
+const ctx = canvas.getContext('2d');
+let CELL = 0;
+const PADDING = 4;
+
+function calcCell() {
+  const maxSize = Math.min(window.innerWidth - 32, 400);
+  const availH = window.innerHeight - 280;
+  const maxByH = Math.floor((availH - PADDING * 2) / SIDE);
+  return Math.max(20, Math.min(Math.floor(maxSize / SIDE), maxByH));
+}
+
+function resizeCanvas() {
+  CELL = calcCell();
+  const size = CELL * SIDE + PADDING * 2;
+  canvas.width = size;
+  canvas.height = size;
+  draw();
+}
+
+/* ═══ DRAW ═══ */
+function draw() {
+  const size = CELL * SIDE;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // bg
+  ctx.fillStyle = '#000d2e';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // highlight selected row/col/box
+  if (selected) {
+    ctx.fillStyle = 'rgba(100,180,255,0.05)';
+    ctx.fillRect(PADDING, PADDING + selected.row * CELL, size, CELL);
+    ctx.fillRect(PADDING + selected.col * CELL, PADDING, CELL, size);
+
+    const br = Math.floor(selected.row / 3) * 3;
+    const bc = Math.floor(selected.col / 3) * 3;
+    ctx.fillRect(PADDING + bc * CELL, PADDING + br * CELL, CELL * 3, CELL * 3);
+  }
+
+  // Grid lines
+  for (let i = 0; i <= SIDE; i++) {
+    const x = PADDING + i * CELL;
+    const y = PADDING + i * CELL;
+    const thick = i % 3 === 0 ? 2.5 : 0.8;
+    ctx.strokeStyle = i % 3 === 0 ? 'rgba(150,200,255,0.4)' : 'rgba(100,150,200,0.18)';
+    ctx.lineWidth = thick;
+    ctx.beginPath(); ctx.moveTo(x, PADDING); ctx.lineTo(x, PADDING + size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PADDING, y); ctx.lineTo(PADDING + size, y); ctx.stroke();
+  }
+
+  // Selected cell highlight
+  if (selected) {
+    const sx = PADDING + selected.col * CELL;
+    const sy = PADDING + selected.row * CELL;
+    ctx.fillStyle = 'rgba(100,180,255,0.12)';
+    ctx.fillRect(sx, sy, CELL, CELL);
+    ctx.strokeStyle = 'rgba(168,212,255,0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(sx + 1, sy + 1, CELL - 2, CELL - 2);
+  }
+
+  const clueColor = 'rgba(220,230,255,0.9)';
+  const fontSize = Math.max(14, Math.floor(CELL * 0.55));
+
+  // Draw clues and fills
+  for (let r = 0; r < SIDE; r++) {
+    for (let c = 0; c < SIDE; c++) {
+      const cx = PADDING + c * CELL + CELL / 2;
+      const cy = PADDING + r * CELL + CELL / 2;
+
+      // Clue
+      if (puzzle[r] && puzzle[r][c] !== 0) {
+        ctx.fillStyle = clueColor;
+        ctx.font = `600 ${fontSize}px 'Inter', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(puzzle[r][c], cx, cy + 1);
+        continue;
+      }
+
+      // Player fills
+      let val = null, pid = null;
+      const key = `${r},${c}`;
+      if (cells.b[key] !== undefined) { val = cells.b[key]; pid = 'b'; }
+      else if (cells.a[key] !== undefined) { val = cells.a[key]; pid = 'a'; }
+
+      if (val !== null && pid) {
+        const col = COLORS[pid];
+        const pulse = 0.85 + 0.15 * Math.sin(Date.now() * 0.003 + (pid === 'b' ? 0 : 2));
+        ctx.save();
+        ctx.shadowColor = col.glow;
+        ctx.shadowBlur = 6 * pulse;
+        ctx.fillStyle = col.fill;
+        ctx.font = `600 ${fontSize}px 'Inter', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(val, cx, cy + 1);
+        ctx.restore();
+      }
+    }
+  }
+
+  // outer border
+  ctx.strokeStyle = 'rgba(100,180,255,0.2)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(PADDING, PADDING, size, size);
+}
+
+/* ═══ WEBSOCKET ═══ */
+let ws = null;
+
+function setConn(state) {
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connText');
+  dot.className = 'conn-dot';
+  if (state === 'off') { dot.classList.add('off'); txt.textContent = 'Disconnected'; }
+  else if (state === 'connecting') { dot.classList.add('connecting'); txt.textContent = 'Connecting...'; }
+  else if (state === 'connected') { dot.classList.add('on'); txt.textContent = 'Waiting for partner...'; }
+  else if (state === 'playing') { dot.classList.add('playing'); txt.textContent = 'Playing 💫'; }
+}
+
+function connect() {
+  setConn('connecting');
+  if (ws) { ws.onclose = null; ws.close(); }
+  ws = new WebSocket(SERVER_URL);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({type:'join', game:'sudoku'}));
+    setConn('connected');
+  };
+
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    switch (d.type) {
+      case 'init':
+        playerId = d.player;
+        puzzle = d.puzzle;
+        cells = d.cells || { b: {}, a: {} };
+        document.getElementById('tag' + d.player.toUpperCase()).classList.add('you');
+        resizeCanvas();
+        setConn('connected');
+        break;
+      case 'start':
+        setConn('playing');
+        document.getElementById('statusB').textContent = 'playing';
+        document.getElementById('statusA').textContent = 'playing';
+        break;
+      case 'update':
+        cells = d.cells;
+        draw();
+        break;
+      case 'error':
+        if (d.reason === 'wrong') {
+          canvas.style.transition = 'box-shadow .15s';
+          canvas.style.boxShadow = '0 0 30px rgba(255,77,109,.5)';
+          setTimeout(() => { canvas.style.boxShadow = ''; }, 200);
+        }
+        break;
+      case 'win':
+        showWin();
+        break;
+    }
+  };
+
+  ws.onclose = () => {
+    setConn('off');
+    setTimeout(connect, 2000);
+  };
+
+  ws.onerror = () => { ws.close(); };
+}
+
+function sendPlace(row, col, num) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type:'place', row, col, num}));
+  }
+}
+
+function sendErase(row, col) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({type:'erase', row, col}));
+  }
+}
+
+/* ═══ INTERACTION ═══ */
+function cellFromClick(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (clientX - rect.left) * scaleX;
+  const my = (clientY - rect.top) * scaleY;
+  const col = Math.floor((mx - PADDING) / CELL);
+  const row = Math.floor((my - PADDING) / CELL);
+  if (row >= 0 && row < SIDE && col >= 0 && col < SIDE) {
+    return { row, col };
+  }
+  return null;
+}
+
+canvas.addEventListener('click', (e) => {
+  const cell = cellFromClick(e.clientX, e.clientY);
+  if (cell) selected = cell;
+  draw();
+});
+
+canvas.addEventListener('touchstart', (e) => {
+  const t = e.touches[0];
+  const cell = cellFromClick(t.clientX, t.clientY);
+  if (cell) { selected = cell; draw(); }
+}, { passive: true });
+
+document.addEventListener('keydown', (e) => {
+  if (!playerId || !selected) return;
+  const { row, col } = selected;
+  const key = e.key;
+
+  // Arrow keys to navigate
+  if (key.startsWith('Arrow')) {
+    e.preventDefault();
+    const dirs = { ArrowUp: [-1,0], ArrowDown: [1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
+    const [dr, dc] = dirs[key];
+    const nr = Math.max(0, Math.min(SIDE - 1, row + dr));
+    const nc = Math.max(0, Math.min(SIDE - 1, col + dc));
+    if (nr !== row || nc !== col) { selected = { row: nr, col: nc }; draw(); }
+    return;
+  }
+
+  if (key >= '1' && key <= '9') {
+    e.preventDefault();
+    const num = parseInt(key);
+    sendPlace(row, col, num);
+    return;
+  }
+
+  if (key === 'Backspace' || key === 'Delete') {
+    e.preventDefault();
+    sendErase(row, col);
+  }
+});
+
+/* ═══ NUMPAD ═══ */
+const numpad = document.getElementById('numpad');
+for (let n = 1; n <= 9; n++) {
+  const btn = document.createElement('button');
+  btn.className = 'num-btn';
+  btn.textContent = n;
+  btn.addEventListener('click', () => {
+    if (!playerId || !selected) return;
+    sendPlace(selected.row, selected.col, n);
+  });
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (!playerId || !selected) return;
+    sendPlace(selected.row, selected.col, n);
+  }, { passive: false });
+  numpad.appendChild(btn);
+}
+const eraseBtn = document.createElement('button');
+eraseBtn.className = 'num-btn erase';
+eraseBtn.textContent = '✕ erase';
+eraseBtn.addEventListener('click', () => {
+  if (!playerId || !selected) return;
+  sendErase(selected.row, selected.col);
+});
+eraseBtn.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (!playerId || !selected) return;
+  sendErase(selected.row, selected.col);
+}, { passive: false });
+numpad.appendChild(eraseBtn);
+
+/* ═══ WIN ═══ */
+let hasWon = false;
+function showWin() {
+  if (hasWon) return;
+  hasWon = true;
+  document.getElementById('winOverlay').classList.add('show');
+  for (let i=0;i<50;i++) setTimeout(()=>spawnHeart(), Math.random()*3000);
+}
+function spawnHeart() {
+  const h=document.createElement('div'); h.className='float-heart';
+  h.textContent=['💜','💙','💖','✨','🌸','💝','⭐','🎉'][Math.floor(Math.random()*8)];
+  h.style.cssText=`left:${Math.random()*100}vw;top:${70+Math.random()*25}vh;position:fixed;font-size:${Math.random()*2+1}rem;pointer-events:none;z-index:99997;`;
+  document.body.appendChild(h); setTimeout(()=>h.remove(),4200);
+}
+
+/* ═══ ANIMATION LOOP ═══ */
+function loop() {
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* ═══ RESIZE ═══ */
+window.addEventListener('resize', resizeCanvas);
+
+/* ═══ CONNECT ═══ */
+connect();
+</script>
+</body>
+</html>

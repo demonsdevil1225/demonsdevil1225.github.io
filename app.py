@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import random
 import os
@@ -9,7 +9,6 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # ═══════════════════════════════════════════
 # MAZE GENERATOR (recursive backtracker)
-# 1 = walkable path, 0 = wall
 # ═══════════════════════════════════════════
 MAZE_SIZES = {
     'small': (21, 21),
@@ -46,7 +45,7 @@ def generate_maze(cols=41, rows=41):
 SUDOKU_SIDE = 9
 SUDOKU_BASE = 3
 
-def generate_sudoku():
+def generate_sudoku():q
     side = SUDOKU_SIDE
     base = SUDOKU_BASE
     pattern = [0] * side
@@ -84,18 +83,67 @@ def generate_sudoku():
 
     return board, solution
 
-words = [
-    "🍎 Apple", "🍊 Orange", "🍋 Lemon", "🍇 Grapes", "🍉 Watermelon",
-    "🍓 Strawberry", "🫐 Blueberry", "🍒 Cherry", "🍑 Peach", "🥭 Mango",
-    "🍍 Pineapple", "🥥 Coconut", "🥝 Kiwi", "🍌 Banana", "🥑 Avocado",
-    "🌶️ Pepper", "🥕 Carrot", "🌽 Corn", "🥔 Potato", "🍄 Mushroom",
-    "🌰 Chestnut", "🥜 Peanut", "🍯 Honey", "🍞 Bread", "🧀 Cheese",
-    "🥚 Egg", "🍳 Fried Egg", "🥞 Pancake", "🧇 Waffle", "🥓 Bacon",
-    "🍔 Burger", "🍟 Fries", "🍕 Pizza", "🌭 Hotdog", "🥪 Sandwich",
-    "🌮 Taco", "🌯 Burrito", "🫔 Tamale", "🧆 Falafel", "🥗 Salad",
-    "🍝 Pasta", "🍜 Noodles", "🍲 Soup", "🍛 Curry", "🍣 Sushi",
-    "🍱 Bento", "🥟 Dumpling", "🍤 Shrimp", "🍙 Rice Ball", "🍘 Cracker",
-    "🍥 Fish Cake", "🍙 Onigiri"
+
+# ═══════════════════════════════════════════
+# SEX POSITIONS CARDS (56 positions)
+# ═══════════════════════════════════════════
+positions = [
+    {"name": "Stand and Deliver", "aka": "The Bicycle", "image": "card1.jpg"},
+    {"name": "Face Off", "aka": "The Lap Dance", "image": "card2.jpg"},
+    {"name": "Pearly Gates", "aka": "", "image": "card3.jpg"},
+    {"name": "The Socket", "aka": "", "image": "card4.jpg"},
+    {"name": "Happy Baby", "aka": "", "image": "card5.jpg"},
+    {"name": "Standing O", "aka": "", "image": "card6.jpg"},
+    {"name": "The Little Dipper", "aka": "", "image": "card7.jpg"},
+    {"name": "The 69 Bridge", "aka": "Golden Gate", "image": "card8.jpg"},
+    {"name": "Coital Alignment Technique", "aka": "The CAT", "image": "card9.jpg"},
+    {"name": "The Captain", "aka": "V is for Victory", "image": "card10.jpg"},
+    {"name": "Waterfall", "aka": "Head Rush", "image": "card11.jpg"},
+    {"name": "One Up", "aka": "Over Your Shoulder", "image": "card12.jpg"},
+    {"name": "The Cowgirl", "aka": "", "image": "card13.jpg"},
+    {"name": "The Hot Seat", "aka": "The Love Seat", "image": "card14.jpg"},
+    {"name": "Spin Cycle", "aka": "Maytag Repair Man", "image": "card15.jpg"},
+    {"name": "Stairway to Heaven", "aka": "Step Lively", "image": "card16.jpg"},
+    {"name": "Reverse Cowgirl", "aka": "Rodeo Drive", "image": "card17.jpg"},
+    {"name": "Thighmaster", "aka": "Double the Pleasure", "image": "card18.jpg"},
+    {"name": "The Lazy Man", "aka": "The Squat Thrust", "image": "card19.jpg"},
+    {"name": "David Copperfield", "aka": "Trick & Treat", "image": "card20.jpg"},
+    {"name": "Heir to the Throne", "aka": "Lazy Girl", "image": "card21.jpg"},
+    {"name": "Closed for Business", "aka": "", "image": "card22.jpg"},
+    {"name": "The Pretzel", "aka": "The Pretzel Dip", "image": "card23.jpg"},
+    {"name": "Yourself on the Shelf", "aka": "The Bicycle", "image": "card24.jpg"},
+    {"name": "The G-Whiz", "aka": "The Shoulder Holder", "image": "card25.jpg"},
+    {"name": "Doggy Style", "aka": "Man's Best Friend", "image": "card26.jpg"},
+    {"name": "The Flatiron", "aka": "Downward Dog", "image": "card27.jpg"},
+    {"name": "Butter Churner", "aka": "Squat Thruster", "image": "card28.jpg"},
+    {"name": "The Ballet Dancer", "aka": "", "image": "card29.jpg"},
+    {"name": "Iron Chef", "aka": "Kitchen Confidential", "image": "card30.jpg"},
+    {"name": "H2Ohh Yeah", "aka": "Aquaman's Delight", "image": "card31.jpg"},
+    {"name": "Standing Wheelbarrow", "aka": "The Hoover Maneuver", "image": "card32.jpg"},
+    {"name": "Seated Wheelbarrow", "aka": "Wheelbarrow at Rest", "image": "card33.jpg"},
+    {"name": "The Standing Dragon", "aka": "", "image": "card34.jpg"},
+    {"name": "Restroom Attendant", "aka": "Don't Get Caught", "image": "card35.jpg"},
+    {"name": "Couch Surfer", "aka": "The Lazy Susan", "image": "card36.jpg"},
+    {"name": "Quickie-Fix", "aka": "The Bends", "image": "card37.jpg"},
+    {"name": "Mountain Climber", "aka": "The Pushup", "image": "card38.jpg"},
+    {"name": "Quicker Picker Upper", "aka": "The Pillow Driver", "image": "card39.jpg"},
+    {"name": "Missionary", "aka": "The Matrimonial", "image": "card40.jpg"},
+    {"name": "Spoon", "aka": "The Sleeper Hold", "image": "card41.jpg"},
+    {"name": "Open-Legged Spoon", "aka": "", "image": "card42.jpg"},
+    {"name": "Spork", "aka": "Spoon and Fork Combo", "image": "card43.jpg"},
+    {"name": "Gift Wrapped", "aka": "The Horny Mantis", "image": "card44.jpg"},
+    {"name": "Spoon, Facing", "aka": "Sidewinder", "image": "card45.jpg"},
+    {"name": "The X Position", "aka": "Scissoring", "image": "card46.jpg"},
+    {"name": "Snow Angel", "aka": "Bottom's Up", "image": "card47.jpg"},
+    {"name": "The Fusion", "aka": "Getting a Leg Up", "image": "card48.jpg"},
+    {"name": "The Spider", "aka": "", "image": "card49.jpg"},
+    {"name": "Hovering Butterfly", "aka": "", "image": "card50.jpg"},
+    {"name": "69", "aka": "Inverted 69", "image": "card51.jpg"},
+    {"name": "The Face Sitter", "aka": "Hovering Dragonfly", "image": "card52.jpg"},
+    {"name": "The Elevator", "aka": "The Bees Knees", "image": "card53.jpg"},
+    {"name": "Swiss Ball Blitz", "aka": "Romper Room", "image": "card54.jpg"},
+    {"name": "Magic Mountain", "aka": "", "image": "card55.jpg"},
+    {"name": "The Seashell", "aka": "", "image": "card56.jpg"},
 ]
 
 rooms = {}
@@ -120,21 +168,23 @@ def get_room(room_id):
 
 
 def pick_random_card(room):
-    available = [i for i in range(52) if i not in room['used_cards']]
+    available = [i for i in range(len(positions)) if i not in room['used_cards']]
     if not available:
         room['used_cards'] = []
-        available = list(range(52))
+        available = list(range(len(positions)))
     card = random.choice(available)
     room['used_cards'].append(card)
     return card
 
 
 def pick_dice_card(room):
-    card_index = random.randint(0, 51)
+    card_index = random.randint(0, len(positions) - 1)
+    pos = positions[card_index]
     return {
         'index': card_index,
-        'emoji': words[card_index].split(' ')[0],
-        'word': ' '.join(words[card_index].split(' ')[1:]),
+        'name': pos['name'],
+        'aka': pos['aka'],
+        'image': pos['image'],
     }
 
 
@@ -142,17 +192,25 @@ def pick_dice_card(room):
 def index():
     return render_template('hub.html')
 
+
 @app.route('/rps')
 def rps_page():
     return render_template('rps.html')
+
 
 @app.route('/maze')
 def maze_page():
     return render_template('maze.html')
 
+
 @app.route('/sudoku')
 def sudoku_page():
     return render_template('sudoku.html')
+
+
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('png/images', filename)
 
 
 @socketio.on('connect')
@@ -310,10 +368,12 @@ def handle_remove_emoji(data):
         if room[f'{target}_emojis'] == 0 and not room[f'{target}_cards_revealed']:
             room[f'{target}_cards_revealed'] = True
             card_index = pick_random_card(room)
+            pos = positions[card_index]
             card_data = {
                 'index': card_index,
-                'emoji': words[card_index].split(' ')[0],
-                'word': ' '.join(words[card_index].split(' ')[1:]),
+                'name': pos['name'],
+                'aka': pos['aka'],
+                'image': pos['image'],
             }
             emit('reveal_card', {
                 'player': target,

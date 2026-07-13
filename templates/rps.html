@@ -186,9 +186,9 @@ body{
 .float-heart{position:fixed;pointer-events:none;z-index:99997;animation:floatUp 4s ease-in forwards;}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(-90vh) rotate(20deg) scale(.4)}}
 
-/* ============ CARD OVERLAY ============ */
+/* ============ CARD OVERLAY (FULLSCREEN) ============ */
 .card-overlay{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;
-  background:rgba(0,5,20,0.82);backdrop-filter:blur(12px);}
+  background:rgba(0,5,20,0.95);backdrop-filter:blur(16px);}
 .card-overlay.show{display:flex;animation:fadeIn .4s ease;}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .card-box{display:flex;flex-direction:column;align-items:center;gap:.8rem;animation:popIn .4s ease;}
@@ -201,89 +201,97 @@ body{
   cursor:pointer;margin-top:.4rem;
 }
 
-/* ============ SLIDE CARD (from 2nd code) ============ */
-.slide-card{position:relative;z-index:10001;perspective:800px;margin-bottom:40px;}
+/* ============ SLIDE CARD (FULLSCREEN VERTICAL) ============ */
+.slide-card{position:relative;z-index:10001;width:100%;height:100%;}
 .slide-card-inner{
-  width:220px;min-height:300px;
-  background:linear-gradient(145deg,#1a1a3e,#2d1b69,#1a1a3e);
-  border:3px solid var(--gold);border-radius:20px;
+  width:100%;height:100vh;
+  background:linear-gradient(180deg,#0a0a1a 0%,#1a1a3e 50%,#0a0a1a 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:30px 20px;
-  box-shadow:0 0 60px rgba(255,217,125,.3),0 20px 60px rgba(0,0,0,.5);
+  padding:40px 20px;
   animation:slideCardIn .8s cubic-bezier(.34,1.56,.64,1) forwards;
-  opacity:0;transform:translateX(-120vw) rotate(-15deg) scale(.5);
+  opacity:0;transform:translateY(-100vh);
 }
 @keyframes slideCardIn{
-  0%{opacity:0;transform:translateX(-120vw) rotate(-15deg) scale(.5)}
-  50%{opacity:1}
-  70%{transform:translateX(10px) rotate(3deg) scale(1.05)}
-  85%{transform:translateX(-5px) rotate(-1deg) scale(.98)}
-  100%{opacity:1;transform:translateX(0) rotate(0) scale(1)}
+  0%{opacity:0;transform:translateY(-100vh)}
+  60%{opacity:1;transform:translateY(20px)}
+  80%{transform:translateY(-10px)}
+  100%{opacity:1;transform:translateY(0)}
 }
 @keyframes slideCardOut{
-  0%{opacity:1;transform:translateX(0) rotate(0) scale(1)}
-  40%{transform:translateX(-10px) rotate(-2deg) scale(1.02)}
-  100%{opacity:0;transform:translateX(120vw) rotate(15deg) scale(.3)}
+  0%{opacity:1;transform:translateY(0)}
+  40%{transform:translateY(-10px)}
+  100%{opacity:0;transform:translateY(100vh)}
 }
 .slide-card-inner.exit{animation:slideCardOut .6s cubic-bezier(.55,.06,.68,.19) forwards;}
-.slide-card-number{font-size:1rem;color:var(--gold);font-weight:bold;margin-bottom:15px;letter-spacing:2px;}
-.slide-card-emoji{font-size:5rem;margin-bottom:20px;animation:emojiGlow 2s ease-in-out infinite;}
-@keyframes emojiGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(255,217,125,.3))}50%{filter:drop-shadow(0 0 30px rgba(255,217,125,.8))}}
-.slide-card-word{font-size:1.4rem;font-weight:bold;color:#fff;text-align:center;}
+.slide-card-number{font-size:1.5rem;color:var(--gold);font-weight:bold;margin-bottom:30px;letter-spacing:3px;}
+.slide-card-image{width:80vw;max-width:400px;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:16px;margin-bottom:30px;animation:emojiGlow 2s ease-in-out infinite;border:3px solid rgba(255,217,125,.4);box-shadow:0 0 80px rgba(255,217,125,.3);}
+@keyframes emojiGlow{0%,100%{filter:drop-shadow(0 0 20px rgba(255,217,125,.3))}50%{filter:drop-shadow(0 0 50px rgba(255,217,125,.8))}}
+.slide-card-word{font-size:2rem;font-weight:bold;color:#fff;text-align:center;margin-bottom:10px;}
+.slide-card-aka{font-size:1.1rem;color:rgba(255,217,125,.7);font-style:italic;text-align:center;}
 
-/* ============ TIMER ============ */
-.timer-section{position:relative;z-index:10001;text-align:center;animation:fadeIn .5s ease .8s both;}
-.timer-bar{width:280px;height:8px;background:rgba(255,255,255,.15);border-radius:4px;margin:0 auto 12px;overflow:hidden;}
-.timer-fill{width:100%;height:100%;background:linear-gradient(90deg,#ff4444,#ffd97d,#44ff44);border-radius:4px;transition:width 1s linear;}
+/* ============ TIMER (FULLSCREEN) ============ */
+.timer-section{position:relative;z-index:10001;text-align:center;animation:fadeIn .5s ease .8s both;margin-top:40px;width:100%;}
+.timer-bar{width:80%;max-width:350px;height:10px;background:rgba(255,255,255,.15);border-radius:5px;margin:0 auto 14px;overflow:hidden;}
+.timer-fill{width:100%;height:100%;background:linear-gradient(90deg,#ff4444,#ffd97d,#44ff44);border-radius:5px;transition:width 1s linear;}
 .timer-fill.warning{background:linear-gradient(90deg,#ff2222,#ff4444);animation:timerPulse .5s infinite;}
 @keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.6}}
-.timer-text{font-size:1.5rem;font-weight:bold;color:var(--gold);margin-bottom:20px;font-variant-numeric:tabular-nums;}
+.timer-text{font-size:2.5rem;font-weight:bold;color:var(--gold);margin-bottom:25px;font-variant-numeric:tabular-nums;}
 .btn-over{
   background:linear-gradient(135deg,#ff4444,#cc0000);border:none;color:#fff;
-  padding:15px 50px;border-radius:12px;font-size:1.3rem;font-weight:bold;cursor:pointer;
-  transition:all .3s;text-transform:uppercase;letter-spacing:2px;
-  box-shadow:0 5px 20px rgba(255,0,0,.3);
+  padding:20px 80px;border-radius:16px;font-size:1.8rem;font-weight:bold;cursor:pointer;
+  transition:all .3s;text-transform:uppercase;letter-spacing:3px;
+  box-shadow:0 8px 30px rgba(255,0,0,.4);
 }
-.btn-over:hover{transform:scale(1.08);box-shadow:0 8px 30px rgba(255,0,0,.5);}
+.btn-over:hover{transform:scale(1.1);box-shadow:0 12px 40px rgba(255,0,0,.6);}
 .btn-over:active{transform:scale(.95);}
 
-/* ============ DICE OVERLAY ============ */
+/* ============ DICE OVERLAY (FULLSCREEN) ============ */
 .dice-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;
-  background:rgba(0,5,20,.82);backdrop-filter:blur(12px);}
-.dice-overlay.show{display:flex;}
-.dice-container{position:relative;z-index:10001;text-align:center;}
-.dice-title{font-size:1.5rem;color:var(--gold);margin-bottom:30px;font-weight:bold;font-family:'Dancing Script',cursive;}
-.dice{font-size:6rem;margin-bottom:20px;transition:transform .1s;}
+  background:rgba(0,5,20,.95);backdrop-filter:blur(16px);}
+.dice-overlay.show{display:flex;animation:fadeIn .4s ease;}
+.dice-container{position:relative;z-index:10001;text-align:center;width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.dice-title{font-size:2rem;color:var(--gold);margin-bottom:40px;font-weight:bold;font-family:'Dancing Script',cursive;}
+.dice{font-size:8rem;margin-bottom:30px;transition:transform .1s;}
 .dice.rolling{animation:diceShake .15s infinite;}
+.dice img{width:70vw;max-width:350px;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:16px;border:3px solid rgba(255,217,125,.4);box-shadow:0 0 80px rgba(255,217,125,.4);}
 @keyframes diceShake{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(15deg) scale(1.1)}50%{transform:rotate(-15deg) scale(1.05)}75%{transform:rotate(10deg) scale(1.1)}}
-.dice-number{font-size:1.8rem;color:#fff;font-weight:bold;margin-top:10px;}
+.dice-number{font-size:2.2rem;color:#fff;font-weight:bold;margin-top:15px;font-family:'Dancing Script',cursive;}
 
-/* ============ FINAL OVERLAY ============ */
+/* ============ FINAL OVERLAY (FULLSCREEN VERTICAL) ============ */
 .final-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;
-  background:rgba(0,5,20,.82);backdrop-filter:blur(12px);}
-.final-overlay.show{display:flex;}
-.final-content{position:relative;z-index:10001;text-align:center;}
-.final-title{font-size:1.2rem;color:rgba(200,220,255,.5);margin-bottom:20px;letter-spacing:2px;font-family:'Dancing Script',cursive;}
+  background:rgba(0,5,20,.95);backdrop-filter:blur(16px);}
+.final-overlay.show{display:flex;animation:fadeIn .5s ease;}
+.final-content{position:relative;z-index:10001;text-align:center;width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.final-title{font-size:1.4rem;color:rgba(200,220,255,.5);margin-bottom:30px;letter-spacing:3px;font-family:'Dancing Script',cursive;}
 .final-card{
-  background:linear-gradient(145deg,#1a1a3e,#2d1b69,#1a1a3e);
-  border:3px solid var(--gold);border-radius:20px;padding:30px 40px;
-  display:inline-flex;flex-direction:column;align-items:center;gap:15px;
-  box-shadow:0 0 60px rgba(255,217,125,.3),0 20px 60px rgba(0,0,0,.5);margin-bottom:25px;
+  background:linear-gradient(180deg,#0a0a1a 0%,#1a1a3e 50%,#0a0a1a 100%);
+  border:3px solid var(--gold);border-radius:20px;padding:40px 30px;
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+  box-shadow:0 0 100px rgba(255,217,125,.4);width:90%;max-width:400px;
 }
-.final-card-emoji{font-size:5rem;animation:emojiGlow 2s ease-in-out infinite;}
-.final-card-word{font-size:1.4rem;font-weight:bold;color:#fff;font-family:'Dancing Script',cursive;}
-.final-card-num{font-size:.9rem;color:var(--gold);letter-spacing:2px;}
-.final-time{font-size:1.2rem;color:var(--gold);margin-bottom:10px;}
-.final-winner{font-size:1.5rem;font-weight:bold;margin-bottom:25px;font-family:'Dancing Script',cursive;color:var(--gold);}
+.final-card-image{width:100%;max-width:350px;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:16px;animation:emojiGlow 2s ease-in-out infinite;border:3px solid rgba(255,217,125,.4);box-shadow:0 0 60px rgba(255,217,125,.3);}
+.final-card-word{font-size:1.8rem;font-weight:bold;color:#fff;font-family:'Dancing Script',cursive;}
+.final-card-aka{font-size:1rem;color:rgba(255,217,125,.7);font-style:italic;}
+.final-card-num{font-size:1rem;color:var(--gold);letter-spacing:3px;}
+.final-time{font-size:1.3rem;color:var(--gold);margin:15px 0;}
+.final-winner{font-size:1.6rem;font-weight:bold;margin-bottom:25px;font-family:'Dancing Script',cursive;color:var(--gold);}
 .btn-roll-again{
   background:linear-gradient(135deg,#667eea,#764ba2);border:none;color:#fff;
-  padding:15px 40px;border-radius:12px;font-size:1.2rem;font-weight:bold;cursor:pointer;
-  transition:all .3s;margin-bottom:20px;box-shadow:0 5px 20px rgba(102,126,234,.4);
+  padding:18px 60px;border-radius:14px;font-size:1.5rem;font-weight:bold;cursor:pointer;
+  transition:all .3s;margin-bottom:25px;box-shadow:0 8px 30px rgba(102,126,234,.5);
 }
-.btn-roll-again:hover{transform:scale(1.05);box-shadow:0 8px 30px rgba(102,126,234,.6);}
+.btn-roll-again:hover{transform:scale(1.08);box-shadow:0 12px 40px rgba(102,126,234,.7);}
 .final-actions{display:flex;gap:15px;justify-content:center;}
 
-@media(max-width:560px){.arena{padding:1.2rem .6rem;}.slide-card-inner{width:180px;min-height:250px;}.slide-card-emoji{font-size:3.5rem;}}
+@media(max-width:560px){
+  .slide-card-image{width:85vw;max-width:300px;}
+  .slide-card-word{font-size:1.6rem;}
+  .final-card-image{width:85vw;max-width:300px;}
+  .final-card-word{font-size:1.5rem;}
+  .timer-text{font-size:2rem;}
+  .btn-over{padding:18px 60px;font-size:1.5rem;}
+  .dice img{width:80vw;max-width:280px;}
+}
 </style>
 </head>
 <body>
@@ -301,14 +309,15 @@ body{
   <div class="slide-card">
     <div class="slide-card-inner" id="slideCardInner">
       <div class="slide-card-number" id="slideCardNum">#1</div>
-      <div class="slide-card-emoji" id="slideCardEmoji">🍑</div>
-      <div class="slide-card-word" id="slideCardWord">Peach</div>
+      <img class="slide-card-image" id="slideCardImage" src="/images/card1.jpg" alt="Position">
+      <div class="slide-card-word" id="slideCardWord">Position Name</div>
+      <div class="slide-card-aka" id="slideCardAka"></div>
+      <div class="timer-section">
+        <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+        <div class="timer-text" id="timerCount">30:00</div>
+        <button class="btn-over" onclick="clickOver()">OVER</button>
+      </div>
     </div>
-  </div>
-  <div class="timer-section">
-    <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-    <div class="timer-text" id="timerCount">30:00</div>
-    <button class="btn-over" onclick="clickOver()">OVER</button>
   </div>
 </div>
 
@@ -327,8 +336,9 @@ body{
     <div class="final-title">YOUR CARD</div>
     <div class="final-card">
       <div class="final-card-num" id="finalCardNum">#1</div>
-      <div class="final-card-emoji" id="finalCardEmoji">🍑</div>
-      <div class="final-card-word" id="finalCardWord">Peach</div>
+      <img class="final-card-image" id="finalCardImage" src="/images/card1.jpg" alt="Position">
+      <div class="final-card-word" id="finalCardWord">Position Name</div>
+      <div class="final-card-aka" id="finalCardAka" style="font-size:.9rem;color:rgba(255,217,125,.7);font-style:italic;"></div>
     </div>
     <div class="final-time" id="finalTime">00:00</div>
     <div class="final-winner" id="finalWinner"></div>
@@ -437,8 +447,8 @@ let emojisActive=true, cardPhaseActive=false, totalTimerSeconds=0, cardTimerInte
 let diceMode=false;
 
 const LIFE_EMOJIS = {
-  p1: [{e:'🍎',n:'Apple'},{e:'🍊',n:'Orange'},{e:'🍋',n:'Lemon'},{e:'🍇',n:'Grapes'},{e:'🍉',n:'Melon'}],
-  p2: [{e:'🌸',n:'Blossom'},{e:'🦋',n:'Butterfly'},{e:'🍬',n:'Candy'},{e:'🎀',n:'Ribbon'},{e:'🌈',n:'Rainbow'}]
+  p1: [{e:'⌚',n:'Watch'},{e:'👕',n:'Shirt'},{e:'👖',n:'Pants'},{e:'🎽',n:'Jersey'},{e:'🩳',n:'Shorts'}],
+  p2: [{e:'💍',n:'Ring'},{e:'👗',n:'Dress'},{e:'👖',n:'Jeans'},{e:'👙',n:'Bikini'},{e:'🩲',n:'Briefs'}]
 };
 
 /* ═══ DOM ═══ */
@@ -482,8 +492,9 @@ function startCardTimer(){
 function showSlideCard(card,startTimer){
   const o=$('slideCardOverlay'),inner=$('slideCardInner');
   $('slideCardNum').textContent='#'+(card.index+1);
-  $('slideCardEmoji').textContent=card.emoji;
-  $('slideCardWord').textContent=card.word;
+  $('slideCardImage').src='/images/'+card.image;
+  $('slideCardWord').textContent=card.name;
+  $('slideCardAka').textContent=card.aka ? '(a.k.a. '+card.aka+')' : '';
   o.classList.remove('show');inner.classList.remove('exit');
   o.classList.add('show');
   inner.style.animation='none';void inner.offsetWidth;inner.style.animation='';
@@ -506,8 +517,9 @@ function hideDiceOverlay(){$('diceOverlay').classList.remove('show');$('dice').c
 /* ═══ FINAL ═══ */
 function showFinalOverlay(data){
   $('finalCardNum').textContent='#'+(data.card.index+1);
-  $('finalCardEmoji').textContent=data.card.emoji;
-  $('finalCardWord').textContent=data.card.word;
+  $('finalCardImage').src='/images/'+data.card.image;
+  $('finalCardWord').textContent=data.card.name;
+  $('finalCardAka').textContent=data.card.aka ? '(a.k.a. '+data.card.aka+')' : '';
   $('finalTime').textContent=formatTime(data.time_used||0);
   $('finalWinner').textContent=data.winner?`${NAMES[data.winner]} wins the card!`:'Bonus card!';
   $('finalOverlay').classList.add('show');
@@ -587,8 +599,8 @@ function login(player){
       $('dice').textContent=diceIcons[count%4];count++;
       if(count>=15){
         clearInterval(ri);
-        $('dice').textContent=d.card.emoji;
-        $('diceNumber').textContent=d.card.word;
+        $('dice').innerHTML='<img src="/images/'+d.card.image+'" style="width:120px;height:160px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,217,125,.5);">';
+        $('diceNumber').textContent=d.card.name;
         $('diceTitle').textContent=`${NAMES[d.winner]||'Player'} got a card!`;
         setTimeout(()=>{hideDiceOverlay();showFinalOverlay(d);},2500);
       }

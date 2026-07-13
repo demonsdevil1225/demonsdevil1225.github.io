@@ -45,7 +45,7 @@ def generate_maze(cols=41, rows=41):
 SUDOKU_SIDE = 9
 SUDOKU_BASE = 3
 
-def generate_sudoku():q
+def generate_sudoku():
     side = SUDOKU_SIDE
     base = SUDOKU_BASE
     pattern = [0] * side
